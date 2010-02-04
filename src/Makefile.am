@@ -42,9 +42,11 @@ libexecdir = @datadir@/ibus/engine/
 libexec_PROGRAMS = ibus-engine-handwrite
 
 ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	prase.c prase.h \
+					  UI_gtk.c \
 					  handrecog_zinnia.c \
 					  handrecog.c \
 					  handrecog.h \
+					  UI.h \
 					  $(NULL)
 
 component_DATA = handwrite.xml 

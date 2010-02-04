@@ -5,28 +5,7 @@
 #include <freetype/freetype.h>
 #include "engine.h"
 #include "handrecog.h"
-
-typedef struct _IBusHandwriteEngine IBusHandwriteEngine;
-typedef struct _IBusHandwriteEngineClass IBusHandwriteEngineClass;
-
-struct _IBusHandwriteEngine
-{
-	IBusEngine parent;
-
-	/* members */
-	GtkWidget * drawpanel;
-	GdkPoint lastpoint;
-	guint mouse_state;
-	IbusHandwriteRecog * engine;
-	LineStroke currentstroke;
-	gboolean	needclear;
-
-};
-
-struct _IBusHandwriteEngineClass
-{
-	IBusEngineClass parent;
-};
+#include "UI.h"
 
 typedef void (* ibus_engine_callback)(IBusEngine *engine);
 
@@ -42,20 +21,20 @@ static void ibus_handwrite_engine_focus_out(IBusHandwriteEngine *engine);
 static void ibus_handwrite_engine_reset(IBusHandwriteEngine *engine);
 static void ibus_handwrite_engine_enable(IBusHandwriteEngine *engine);
 static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine);
-static void ibus_engine_set_cursor_location(IBusEngine *engine, gint x, gint y,
-		gint w, gint h);
-static void ibus_handwrite_engine_set_capabilities(IBusEngine *engine,
-		guint caps);
-static void ibus_handwrite_engine_page_up(IBusEngine *engine);
-static void ibus_handwrite_engine_page_down(IBusEngine *engine);
-static void ibus_handwrite_engine_cursor_up(IBusEngine *engine);
-static void ibus_handwrite_engine_cursor_down(IBusEngine *engine);
-static void ibus_handwrite_property_activate(IBusEngine *engine,
-		const gchar *prop_name, gint prop_state);
-static void ibus_handwrite_engine_property_show(IBusEngine *engine,
-		const gchar *prop_name);
-static void ibus_handwrite_engine_property_hide(IBusEngine *engine,
-		const gchar *prop_name);
+//static void ibus_engine_set_cursor_location(IBusEngine *engine, gint x, gint y,
+//		gint w, gint h);
+//static void ibus_handwrite_engine_set_capabilities(IBusEngine *engine,
+//		guint caps);
+//static void ibus_handwrite_engine_page_up(IBusEngine *engine);
+//static void ibus_handwrite_engine_page_down(IBusEngine *engine);
+//static void ibus_handwrite_engine_cursor_up(IBusEngine *engine);
+//static void ibus_handwrite_engine_cursor_down(IBusEngine *engine);
+//static void ibus_handwrite_property_activate(IBusEngine *engine,
+//		const gchar *prop_name, gint prop_state);
+//static void ibus_handwrite_engine_property_show(IBusEngine *engine,
+//		const gchar *prop_name);
+//static void ibus_handwrite_engine_property_hide(IBusEngine *engine,
+//		const gchar *prop_name);
 
 static IBusEngineClass *parent_class = NULL;
 
@@ -107,6 +86,7 @@ static void ibus_handwrite_engine_init(IBusHandwriteEngine *handwrite)
 //	puts(__func__);
 	handwrite->engine = ibus_handwrite_recog_new(IBUS_HANDWRITE_RECOG_ENGINE_ZINNIA);
 	ibus_handwrite_recog_load_table(handwrite->engine,IBUS_HANDWRITE_RECOG_TABLE_FROM_FILENAME,modelfile);
+	//UI_buildui(handwrite);
 }
 
 static void ibus_handwrite_engine_destroy(IBusHandwriteEngine *handwrite)
@@ -116,204 +96,15 @@ static void ibus_handwrite_engine_destroy(IBusHandwriteEngine *handwrite)
 	IBUS_OBJECT_CLASS (parent_class)->destroy((IBusObject *) handwrite);
 }
 
-static gboolean on_paint(GtkWidget *widget, GdkEventExpose *event,
-		gpointer user_data)
-{
-	GdkGC *gc;
-
-	IBusHandwriteEngine * engine;
-
-	LineStroke cl;
-	int i;
-
-	MatchedChar * matched;
-
-	engine = (IBusHandwriteEngine *) (user_data);
-
-	gc = gdk_gc_new(widget->window);
-
-	gdk_draw_rectangle(widget->window, gc,0,0,0,199,199);
-
-	gdk_draw_rectangle(widget->window, gc,0,200,0,399,199);
-
-	puts(__func__);
-
-	//已经录入的笔画
-
-	for (i = 0; i < engine->engine->strokes->len ; i++ )
-	{
-		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
-		cl =  g_array_index(engine->engine->strokes,LineStroke,i);
-		gdk_draw_lines(widget->window, gc, cl.points,cl.segments );
-	}
-	//当下笔画
-	if (engine->currentstroke.points)
-		gdk_draw_lines(widget->window, gc, engine->currentstroke.points,
-				engine->currentstroke.segments);
-
-
-	int munber = ibus_handwrite_recog_getmatch(engine->engine,&matched,0);
-
-	//画10个侯选字
-	for (i = 0; i < munber ; ++i)
-	{
-
-		char drawtext[32]={0};
-
-		sprintf(drawtext,"%d.%s",i,matched[i].chr);
-
-		PangoLayout * layout = gtk_widget_create_pango_layout(widget,drawtext);
-
-		gdk_draw_layout(widget->window, gc, (i % 5) * 40 + 3, 205 + (20 * (i / 5)),	layout);
-		g_object_unref(layout);
-	}
-
-	g_object_unref(gc);
-	return TRUE;
-
-}
-
-static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
-		gpointer user_data)
-{
-	IBusHandwriteEngine * engine;
-
-	engine = (IBusHandwriteEngine *) (user_data);
-
-	if (engine->mouse_state == GDK_BUTTON_PRESS) // 鼠标按下状态
-	{
-		if ((event->x > 0) && (event->y > 0) && (event->x < 199) && (event->y
-				< 199))
-		{
-			engine->currentstroke.points
-					= g_renew(GdkPoint,engine->currentstroke.points,engine->currentstroke.segments +1  );
-
-			engine->currentstroke.points[engine->currentstroke.segments].x
-					= event->x;
-			engine->currentstroke.points[engine->currentstroke.segments].y
-					= event->y;
-			engine->currentstroke.segments++;
-			printf("move, x= %lf, Y=%lf, segments = %d \n",event->x,event->y,engine->currentstroke.segments);
-		}
-	}
-	else
-	{
-//	printf("move start, x = %lf y = %lf \n",event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
-		gtk_window_move(GTK_WINDOW(widget),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
-	}
-
-	gdk_window_invalidate_rect(widget->window, 0, TRUE);
-
-	return FALSE;
-}
-
-static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer user_data)
-{
-	IBusHandwriteEngine * engine;
-	LineStroke * token;
-
-	engine = (IBusHandwriteEngine *) (user_data);
-
-	switch (event->type)
-	{
-
-	case GDK_BUTTON_PRESS:
-		if(event->button != 1)
-		{
-			engine->mouse_state = 0;
-			engine->lastpoint.x = event->x;
-			engine->lastpoint.y = event->y;
-			return ;
-		}
-
-		if ((event->x > 0) && (event->y > 0) && (event->x < 199) && (event->y
-				< 199))
-		{
-
-			engine->mouse_state = GDK_BUTTON_PRESS;
-
-			g_print("mouse clicked\n");
-
-			engine->currentstroke.segments = 1;
-
-			engine->currentstroke.points = g_new(GdkPoint,1);
-
-			engine->currentstroke.points[0].x = event->x;
-			engine->currentstroke.points[0].y = event->y;
-
-		}
-		break;
-	case GDK_BUTTON_RELEASE:
-		engine->mouse_state = GDK_BUTTON_RELEASE;
-
-		ibus_handwrite_recog_append_stroke(engine->engine,engine->currentstroke);
-
-		ibus_handwrite_recog_domatch(engine->engine,10);
-
-		g_print("mouse released\n");
-
-		gdk_window_invalidate_rect(event->window, 0, TRUE);
-
-		break;
-	}
-}
-
 static void ibus_handwrite_engine_enable(IBusHandwriteEngine *engine)
 {
-	GdkPixmap * pxmp;
-	GdkGC * gc;
-	GdkColor black, white;
-
-	GdkColormap* colormap = gdk_colormap_get_system();
-
-	gdk_color_black(colormap, &black);
-	gdk_color_white(colormap, &white);
-
-	g_object_unref(colormap);
-
-	if (!engine->drawpanel)
-	//建立绘图窗口, 建立空点
-	{
-		engine->drawpanel = gtk_window_new(GTK_WINDOW_POPUP);
-		gtk_window_move((GtkWindow*) engine->drawpanel, 500, 550);
-		gtk_widget_add_events(GTK_WIDGET(engine->drawpanel),
-				GDK_BUTTON_MOTION_MASK | GDK_BUTTON_RELEASE_MASK| GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK);
-		g_signal_connect_after(G_OBJECT(engine->drawpanel),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);
-		g_signal_connect(G_OBJECT(engine->drawpanel),"expose-event",G_CALLBACK(on_paint),engine);
-		g_signal_connect(G_OBJECT(engine->drawpanel),"button-release-event",G_CALLBACK(on_button),engine);
-		g_signal_connect(G_OBJECT(engine->drawpanel),"button-press-event",G_CALLBACK(on_button),engine);
-
-		gtk_window_resize(GTK_WINDOW(engine->drawpanel), 200, 250);
-
-		gtk_widget_show(engine->drawpanel);
-
-
-		pxmp = gdk_pixmap_new(NULL, 200, 250, 1);
-		gc = gdk_gc_new(GDK_DRAWABLE(pxmp));
-
-		gdk_gc_set_foreground(gc, &black);
-
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp),gc,1,0,0,200,250);
-
-		gdk_gc_set_foreground(gc, &white);
-
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, 30, 30, 0, 360 * 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1,200 - 30,0,30,30,0,360 * 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp),gc,1,200- 30,250 - 30,30,30,0,360 * 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp),gc,1,0,250 - 30,30,30,0,360 * 64);
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp),gc,1,0,15,200 ,250 - 30);
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp),gc,1,15,0,200 - 30,250);
-		gdk_window_shape_combine_mask(engine->drawpanel->window,pxmp,0,0);
-		g_object_unref(gc);
-		g_object_unref(pxmp);
-		gtk_window_set_opacity(GTK_WINDOW(engine->drawpanel),0.62);
-		//	engine->GdkPoints = NULL;
-	}
-	//	gtk_widget_show_all(engine->drawpanel);
+	UI_buildui(engine);
 }
 
 static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
-{ // 撤销绘图窗口，销毁点列表
+{
+	UI_cancelui(engine);
+	// 撤销绘图窗口，销毁点列表
 	if (engine->drawpanel)
 		gtk_widget_destroy(engine->drawpanel);
 	engine->drawpanel = NULL;
@@ -323,28 +114,12 @@ static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
 
 static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 {
-	GdkCursor* cursor;
-
-	printf("%s \n", __func__);
-	if (engine->drawpanel)
-	{
-		gtk_widget_show(engine->drawpanel);
-
-		cursor = gdk_cursor_new(GDK_PENCIL);
-		if (cursor)
-		{
-			gdk_window_set_cursor(engine->drawpanel->window, cursor);
-			gdk_cursor_unref(cursor);
-		}
-	}
+	UI_show_ui(engine);
 }
 
 static void ibus_handwrite_engine_focus_out(IBusHandwriteEngine *engine)
 {
-	if (engine->drawpanel)
-	{
-		gtk_widget_hide(engine->drawpanel);
-	}
+	UI_hide_ui(engine);
 	printf("%s \n", __func__);
 
 }
@@ -381,7 +156,6 @@ static gboolean ibus_handwrite_engine_process_key_event(IBusEngine *engine,
 		guint keyval, guint keycode, guint modifiers)
 {
 	IBusHandwriteEngine *handwrite = (IBusHandwriteEngine *) engine;
-	MatchedChar * matched;
 
 	if (!modifiers)
 		return FALSE;
