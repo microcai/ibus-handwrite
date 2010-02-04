@@ -1,8 +1,6 @@
 /* vim:set et sts=4: */
 
 #include <string.h>
-#include <ft2build.h>
-#include <freetype/freetype.h>
 #include "engine.h"
 #include "handrecog.h"
 #include "UI.h"
