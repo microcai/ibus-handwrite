@@ -41,7 +41,7 @@ static gboolean paint_ui(GtkWidget *widget, GdkEventExpose *event,
 		gdk_draw_lines(widget->window, gc, cl.points,cl.segments );
 	}
 	//当下笔画
-	if (engine->currentstroke.points)
+	if ( engine->currentstroke.segments && engine->currentstroke.points )
 		gdk_draw_lines(widget->window, gc, engine->currentstroke.points,
 				engine->currentstroke.segments);
 
@@ -103,6 +103,7 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 
 static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer user_data)
 {
+	int i;
 	IBusHandwriteEngine * engine;
 
 	engine = (IBusHandwriteEngine *) (user_data);
@@ -119,12 +120,10 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 			return TRUE;
 		}
 
+		engine->mouse_state = GDK_BUTTON_PRESS;
 		if ((event->x > 0) && (event->y > 0) && (event->x < 199) && (event->y
 				< 199))
 		{
-
-			engine->mouse_state = GDK_BUTTON_PRESS;
-
 			g_print("mouse clicked\n");
 
 			engine->currentstroke.segments = 1;
@@ -135,11 +134,34 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 			engine->currentstroke.points[0].y = event->y;
 
 		}
+		else if( (event->x > 0) && (event->y > 0) && (event->x < 199) )
+		{
+			int x = event->x;
+			int y = event->y;
+			//看鼠标点击的是哪个字，吼吼
+			for (i = 9; i >= 0; --i)
+			{
+				if( ( (i % 5) * 40 + 3 ) <= x && (  (205 + (20 * (i / 5)) ) <=y ) )
+				{
+					printf("user click %d\n",i);
+					ibus_handwrite_engine_commit_text(engine,i);
+					break;
+				}
+//				(205 + (20 * (i / 5)) );
+			}
+
+		}
 		break;
 	case GDK_BUTTON_RELEASE:
 		engine->mouse_state = GDK_BUTTON_RELEASE;
 
 		ibus_handwrite_recog_append_stroke(engine->engine,engine->currentstroke);
+
+
+		engine->currentstroke.segments = 0;
+		g_free(engine->currentstroke.points);
+
+		engine->currentstroke.points = NULL;
 
 		ibus_handwrite_recog_domatch(engine->engine,10);
 

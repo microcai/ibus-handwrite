@@ -127,7 +127,7 @@ static void ibus_handwrite_engine_reset(IBusHandwriteEngine *engine)
 //	ibus_handwrite_engine_disable(engine);
 }
 
-static gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index)
+gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index)
 {
 	IBusText *text;
 	MatchedChar * matched;

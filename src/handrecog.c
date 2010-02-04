@@ -6,7 +6,7 @@
  */
 
 #include <stdarg.h>
-
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,21 +33,39 @@ guint ibus_handwrite_recog_getmatch(IbusHandwriteRecog* recog,MatchedChar ** mat
 
 void ibus_handwrite_recog_clear_stroke(IbusHandwriteRecog*obj)
 {
-	g_array_set_size(obj->strokes, 0);
+	obj->strokes = g_array_set_size(obj->strokes,0);
+
 	if (IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke)
 		IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke(obj);
 }
 
 void ibus_handwrite_recog_append_stroke(IbusHandwriteRecog*obj,LineStroke stroke)
 {
-	obj->strokes = g_array_append_val(obj->strokes,stroke);
-	if(IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke)
-		IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke(obj);
+	LineStroke s;
+	s.segments = stroke.segments;
+
+	if (stroke.segments)
+	{
+		s.points = g_new(GdkPoint,s.segments);
+		memcpy(s.points, stroke.points, s.segments * sizeof(GdkPoint));
+
+		obj->strokes = g_array_append_val(obj->strokes,s);
+
+		if (IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke)
+			IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke(obj);
+	}
 }
 
 void ibus_handwrite_recog_remove_stroke(IbusHandwriteRecog*obj,int number)
 {
+	int i;
+	for( i =obj->strokes->len - number;i< obj->strokes->len ; i++)
+	{
+		g_free(g_array_index(obj->strokes,LineStroke,i).points);
+	}
+
 	obj->strokes = g_array_remove_range(obj->strokes,obj->strokes->len - number,number);
+
 	if(IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke)
 		IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke(obj);
 }
