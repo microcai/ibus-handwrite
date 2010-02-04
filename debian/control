@@ -2,8 +2,8 @@ Source: ibus-handwrite
 Section: i18n
 Priority: optional
 Maintainer: microcai <microcaicai@gmail.com>
-Build-Depends: debhelper (>= 7), autotools-dev ,libibus-dev, libgtk2.0-dev , libglib-dev , libzinnia-dev
-Standards-Version: 0.0.1
+Build-Depends: debhelper (>= 7), autotools-dev ,libibus-dev, libgtk2.0-dev , libglib2.0-dev , libzinnia-dev
+Standards-Version: 1.0.0
 Homepage: http://ibus-handwrite.googlecode.com
 
 Package: ibus-handwrite
