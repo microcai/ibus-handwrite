@@ -29,6 +29,7 @@ ltmain.sh
 missing
 stamp-*
 *.gmo
+build-stamp
 py-compile
 ibus-handwrite*.tar.*
 ibus-handwrite.spec
@@ -36,5 +37,8 @@ ibus-handwrite.pot
 src/handwrite.xml*
 hanzilookup.readme.txt
 src/ibus-engine-handwrite
-src/hanzilookup/
-src/kiang/
+debian/files
+debian/ibus-handwrite/
+debian/ibus-handwrite*
+
+
