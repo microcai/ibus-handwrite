@@ -74,11 +74,27 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 
 	engine = (IBusHandwriteEngine *) (user_data);
 
+	GdkCursorType ct ;
+
+	ct = event->y < 200 ?  GDK_PENCIL:GDK_CENTER_PTR;
+
+	if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
+		ct = GDK_FLEUR;
+//	ct = GDK_FLEUR;
+
+	GdkCursor * cursor = gdk_cursor_new(ct);// event->y <200 ?  GDK_PENCIL:GDK_HAND2);
+
+	gdk_window_set_cursor(widget->window, cursor);
+
+	gdk_cursor_unref(cursor);
+
 	if (engine->mouse_state == GDK_BUTTON_PRESS) // 鼠标按下状态
 	{
 		if ((event->x > 0) && (event->y > 0) && (event->x < 199) && (event->y
 				< 199))
 		{
+
+
 			engine->currentstroke.points
 					= g_renew(GdkPoint,engine->currentstroke.points,engine->currentstroke.segments +1  );
 
@@ -89,14 +105,13 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 			engine->currentstroke.segments++;
 			printf("move, x= %lf, Y=%lf, segments = %d \n",event->x,event->y,engine->currentstroke.segments);
 		}
+		gdk_window_invalidate_rect(widget->window, 0, TRUE);
 	}
-	else
+	else if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
 	{
 //	printf("move start, x = %lf y = %lf \n",event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
 		gtk_window_move(GTK_WINDOW(widget),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
 	}
-
-	gdk_window_invalidate_rect(widget->window, 0, TRUE);
 
 	return FALSE;
 }
@@ -124,6 +139,7 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 		if ((event->x > 0) && (event->y > 0) && (event->x < 199) && (event->y
 				< 199))
 		{
+
 			g_print("mouse clicked\n");
 
 			engine->currentstroke.segments = 1;
@@ -139,6 +155,7 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 			int x = event->x;
 			int y = event->y;
 			//看鼠标点击的是哪个字，吼吼
+
 			for (i = 9; i >= 0; --i)
 			{
 				if( ( (i % 5) * 40 + 3 ) <= x && (  (205 + (20 * (i / 5)) ) <=y ) )
@@ -196,7 +213,7 @@ void UI_buildui(IBusHandwriteEngine * engine)
 		engine->drawpanel = gtk_window_new(GTK_WINDOW_POPUP);
 		gtk_window_move((GtkWindow*) engine->drawpanel, 500, 550);
 		gtk_widget_add_events(GTK_WIDGET(engine->drawpanel),
-				GDK_BUTTON_MOTION_MASK | GDK_BUTTON_RELEASE_MASK
+				GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK
 						| GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK);
 		g_signal_connect_after(G_OBJECT(engine->drawpanel),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);
 		g_signal_connect(G_OBJECT(engine->drawpanel),"expose-event",G_CALLBACK(paint_ui),engine);
@@ -242,13 +259,6 @@ void UI_show_ui(IBusHandwriteEngine * engine)
 	if (engine->drawpanel)
 	{
 		gtk_widget_show(engine->drawpanel);
-
-		cursor = gdk_cursor_new(GDK_PENCIL);
-		if (cursor)
-		{
-			gdk_window_set_cursor(engine->drawpanel->window, cursor);
-			gdk_cursor_unref(cursor);
-		}
 	}
 }
 
