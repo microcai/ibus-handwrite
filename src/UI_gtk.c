@@ -207,6 +207,8 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 	g_object_unref(colormap);
 
+	int R = 5;
+
 	if (!engine->drawpanel)
 	//建立绘图窗口, 建立空点
 	{
@@ -233,15 +235,15 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		gdk_gc_set_foreground(gc, &white);
 
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, 30, 30, 0, 360 * 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - 30, 0, 30, 30, 0, 360
+		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, R*2, R*2, 0, 360 * 64);
+		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 0, R*2, R*2, 0, 360
 				* 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - 30, 250 - 30, 30, 30, 0,
+		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 250 - R*2, R*2, R*2, 0,
 				360 * 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 250 - 30, 30, 30, 0, 360
+		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 250 - R*2, R*2, R*2, 0, 360
 				* 64);
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, 15, 200, 250 - 30);
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 15, 0, 200 - 30, 250);
+		gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, 200, 250 - R*2);
+		gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, 200 - R*2, 250);
 		gdk_window_shape_combine_mask(engine->drawpanel->window, pxmp, 0, 0);
 		g_object_unref(gc);
 		g_object_unref(pxmp);
