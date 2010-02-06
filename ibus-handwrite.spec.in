@@ -9,17 +9,19 @@ License:    GPLv2+
 Group:      System Environment/Libraries
 URL:        http://code.google.com/p/ibus-handwrite/
 Source0:    http://ibus-handwrite.googlecode.com/files/%{name}-%{version}.tar.gz
+Source1:    handwriting-zh_CN.model
 
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  gettext ibus-devel gtk+-2.0-devel
+BuildRequires:  gettext ibus-devel gtk2-devel
 
-Requires:   ibus gtk+-2.0
+Requires:   ibus gtk2
 
 %description
 IBus handwrite project.
 
 %prep
 %setup -q
+cp %{SOURCE1} data/
 
 %build
 %configure --disable-static
@@ -28,7 +30,7 @@ make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make DESTDIR=${RPM_BUILD_ROOT} install
+make DESTDIR=$RPM_BUILD_ROOT install
 
 %find_lang %{name}
 
@@ -38,10 +40,9 @@ rm -rf $RPM_BUILD_ROOT
 %files -f %{name}.lang
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%dir %{_datadir}/ibus-handwrite
+%{_libexecdir}/ibus-engine-handwrite
 %{_datadir}/ibus-handwrite
-%{_bindir}/ibus-engine-handwrite
-%{_datadir}/ibus/engine/handwrite.engine
+%{_datadir}/ibus/component/*
 
 %changelog
 

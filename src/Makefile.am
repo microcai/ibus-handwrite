@@ -37,8 +37,6 @@ AM_CFLAGS= @GTK2_CFLAGS@ @IBUS_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\"  \
 
 AM_LDFLAGS = @IBUS_LIBS@ @GTK2_LIBS@ @ZINNIA_LIBS@ 
 
-libexecdir = @datadir@/ibus/engine/
-
 libexec_PROGRAMS = ibus-engine-handwrite
 
 ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	prase.c prase.h \
