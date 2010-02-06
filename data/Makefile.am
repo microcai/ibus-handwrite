@@ -18,11 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-if WITH_DEBIAN
+if HAVE_TOMOE
 
 else
 
-#EXTRA_DIST = handwriting-ja.model handwriting-zh_CN.model
+EXTRA_DIST = handwriting-zh_CN.model
 
 models_DATA =  $(srcdir)/handwriting-zh_CN.model 
 # $(srcdir)/handwriting-ja.model

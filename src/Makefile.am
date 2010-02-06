@@ -20,20 +20,14 @@
 
 TABLEFILE = $(pkgdatadir)/data/table.txt
 
-if WITH_DEBIAN
-MODEFILE = /usr/share/tegaki/models/zinnia/handwriting-zh_CN.model
-else
-MODEFILE = $(pkgdatadir)/data/handwriting-zh_CN.model
-
 test: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
 		--icon $(top_srcdir)/icons/ibus-handwrite.svg \
-		--model $(top_srcdir)/data/handwriting-zh_CN.model
+		--model @TEST_MODEFILE@ \
 		--table $(top_srcdir)/data/table.txt
-endif
 
 AM_CFLAGS= @GTK2_CFLAGS@ @IBUS_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\"  \
-			-DMODEFILE=\"$(MODEFILE)\" -DTABLEFILE=\"$(TABLEFILE)\"
+			-DMODEFILE=\"@MODEFILE@\" -DTABLEFILE=\"$(TABLEFILE)\"
 
 AM_LDFLAGS = @IBUS_LIBS@ @GTK2_LIBS@ @ZINNIA_LIBS@ 
 

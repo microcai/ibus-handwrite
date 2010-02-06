@@ -48,9 +48,7 @@ AC_ISC_POSIX
 AC_HEADER_STDC
 PKG_PROG_PKG_CONFIG
 
-AC_ARG_WITH(debian,[AC_HELP_STRING([--with-debian],[enable debian specific build])],
-				[AM_CONDITIONAL([WITH_DEBIAN],true)],
-				[AM_CONDITIONAL([WITH_DEBIAN],false)])
+AC_ARG_WITH(debian,[AC_HELP_STRING([--with-debian],[enable debian specific build])],[],[])
 				
 # check ibus
 PKG_CHECK_MODULES(IBUS, [
@@ -68,6 +66,19 @@ PKG_CHECK_MODULES(ZINNIA, [
 GETTEXT_PACKAGE="$PACKAGE_NAME"
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Define to the read-only architecture-independent data directory.])
+
+AC_CHECK_FILE([/usr/share/tegaki/models/zinnia/handwriting-zh_CN.model],[
+		 have_tomoe="yes"
+		 
+		 AC_SUBST([MODEFILE],["/usr/share/tegaki/models/zinnia/handwriting-zh_CN.model"])
+		 AC_SUBST([TEST_MODEFILE],["/usr/share/tegaki/models/zinnia/handwriting-zh_CN.model"])
+		 ]
+		 ,[
+		 AC_SUBST([MODEFILE],['$(pkgdatadir)/data/handwriting-zh_CN.model'])
+		 AC_SUBST([TEST_MODEFILE],['$(top_srcdir)/data/handwriting-zh_CN.model'])
+		 ])
+
+AM_CONDITIONAL(HAVE_TOMOE,[test "x$have_tomoe"="xyes"])
 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION(0.16.1)
