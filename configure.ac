@@ -46,6 +46,7 @@ AM_MAINTAINER_MODE
 AC_PROG_CC
 AC_ISC_POSIX
 AC_HEADER_STDC
+PKG_PROG_PKG_CONFIG
 
 AC_ARG_WITH(debian,[AC_HELP_STRING([--with-debian],[enable debian specific build])],
 				[AM_CONDITIONAL([WITH_DEBIAN],true)],
