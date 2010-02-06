@@ -150,7 +150,7 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 			engine->currentstroke.points[0].y = event->y;
 
 		}
-		else if( (event->x > 0) && (event->y > 0) && (event->x < 199) )
+		else if ((event->x > 0) && (event->y > 0) && (event->x < 199))
 		{
 			int x = event->x;
 			int y = event->y;
@@ -158,15 +158,12 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 
 			for (i = 9; i >= 0; --i)
 			{
-				if( ( (i % 5) * 40 + 3 ) <= x && (  (205 + (20 * (i / 5)) ) <=y ) )
+				if (((i % 5) * 40 + 3) <= x && ((205 + (20 * (i / 5))) <= y))
 				{
-					printf("user click %d\n",i);
-					ibus_handwrite_engine_commit_text(engine,i);
+					IBUS_HANDWRITE_ENGINE_GET_CLASS(engine)->commit_text(engine, i);
 					break;
 				}
-//				(205 + (20 * (i / 5)) );
 			}
-
 		}
 		break;
 	case GDK_BUTTON_RELEASE:

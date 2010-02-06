@@ -34,6 +34,7 @@ struct _IBusHandwriteEngine
 struct _IBusHandwriteEngineClass
 {
 	IBusEngineClass parent;
+	gboolean (*commit_text)(IBusHandwriteEngine * engine , int index);
 };
 
 
