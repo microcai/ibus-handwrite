@@ -1,8 +1,115 @@
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sun Feb 7 13:38:49 2010 +0800
+
+    omg, I misspell the words
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sun Feb 7 02:54:08 2010 +0800
+
+    fix build rule
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sun Feb 7 01:34:16 2010 +0800
+
+    change engine name. my suguest lucykila
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sun Feb 7 01:05:04 2010 +0800
+
+    change  autotools to autodetect handwriting-zh_CN.model file
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sun Feb 7 00:48:27 2010 +0800
+
+    add PKG_PROG_PKG_CONFIG to make sure pkg-config exist
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sun Feb 7 00:39:15 2010 +0800
+
+    add doc/.gitignore incase the compiled result become untracked
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sun Feb 7 00:28:48 2010 +0800
+
+    add document template
+
+Author: Peng Huang <shawn.p.huang@gmail.com>
+Date:   Sat Feb 6 15:48:13 2010 +0800
+
+    Fix rpmbuild errors.
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sat Feb 6 19:51:30 2010 +0800
+
+    add english README
+
+Merge: 4dbe6f0 3cb778b
+Author: microcai <microcai@fedoraproject.org>
+Date:   Sat Feb 6 12:51:48 2010 +0800
+
+    better style of on-click commit text
+
+Author: kiki <kiki@kiki-laptop.(none)>
+Date:   Fri Feb 5 20:55:16 2010 +0800
+
+    README
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Fri Feb 5 19:11:05 2010 +0800
+
+    add missging gitignore
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Fri Feb 5 19:11:05 2010 +0800
+
+    add missging gitignore
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Fri Feb 5 03:30:47 2010 +0800
+
+    better UI,(not too big round )
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Fri Feb 5 03:21:43 2010 +0800
+
+    change cursor on the fly
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Fri Feb 5 02:31:07 2010 +0800
+
+    fix mem leak 鼠标点击上词
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Thu Feb 4 20:54:06 2010 +0800
+
+    fix daebin rule err
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Thu Feb 4 19:28:58 2010 +0800
+
+    my mistake, add missing file
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Thu Feb 4 18:00:09 2010 +0800
+
+    remove useless include
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Thu Feb 4 17:50:34 2010 +0800
+
+    move UI code
+
+Author: microcai <microcai@fedoraproject.org>
+Date:   Thu Feb 4 16:21:25 2010 +0800
+
+    The new rebase git rep
+    hope a fresh new start point
+
+
 ibus-handwrite (1.2.0-1) unstable; urgency=low
 
   * Initial Release.
 
  -- microcai  <microcaicai @ gmail.com>  Tue, 02 Feb 2010 16:07:02 +0800
-
-
 
