@@ -6,6 +6,7 @@
  */
 #include <string.h>
 #include <zinnia.h>
+#include "engine.h"
 #include "handrecog.h"
 
 typedef struct _IbusHandwriteRecogZinnia IbusHandwriteRecogZinnia;
