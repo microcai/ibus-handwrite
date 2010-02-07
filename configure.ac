@@ -93,6 +93,7 @@ src/handwrite.xml.in
 icons/Makefile
 m4/Makefile
 data/Makefile
+doc/Makefile
 )
 
 AC_OUTPUT
