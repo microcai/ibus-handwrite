@@ -130,7 +130,7 @@ gboolean ibus_handwrite_recog_load_table(IbusHandwriteRecog* obj, int way, ...)
 IbusHandwriteRecog* ibus_handwrite_recog_new(ENGINEYTPE enginetype)
 {
 	GType engine[] =
-	{ ibus_handwrite_recog_zinnia_get_type(), G_TYPE_INVALID };
+	{ ibus_handwrite_recog_zinnia_get_type(), ibus_handwrite_recog_lucykila_get_type() };
 
 	return IBUS_HANDWRITE_RECOG(g_type_create_instance(engine[enginetype]));
 }

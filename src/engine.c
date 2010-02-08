@@ -84,7 +84,7 @@ static void ibus_handwrite_engine_class_init(IBusHandwriteEngineClass *klass)
 static void ibus_handwrite_engine_init(IBusHandwriteEngine *handwrite)
 {
 //	puts(__func__);
-	handwrite->engine = ibus_handwrite_recog_new(IBUS_HANDWRITE_RECOG_ENGINE_ZINNIA);
+	handwrite->engine = ibus_handwrite_recog_new(IBUS_HANDWRITE_RECOG_ENGINE_LUCYKILA);
 	ibus_handwrite_recog_load_table(handwrite->engine,IBUS_HANDWRITE_RECOG_TABLE_FROM_FILENAME,modelfile);
 	//UI_buildui(handwrite);
 }

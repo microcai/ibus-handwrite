@@ -58,6 +58,8 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj, int way, ...)
 	char * p;
 	int preservesize;
 
+	puts(__func__);
+
 	//打开表
 	int f = open(tablefile, O_RDONLY);
 	if (f < 0)
