@@ -10,12 +10,14 @@
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 #include <sys/mman.h>
+#include <math.h>
 #include <string.h>
 #include <glib.h>
 
 #include "engine.h"
 #include "handrecog.h"
 
+typedef struct _MATCHED MATCHED;
 typedef struct _IbusHandwriteRecogLucyKila IbusHandwriteRecogLucyKila;
 typedef struct _IbusHandwriteRecogLucyKilaClass IbusHandwriteRecogLucyKilaClass;
 
@@ -28,26 +30,33 @@ GType ibus_handwrite_recog_lucykila_get_type(void);
 #define IBUS_HANDWRITE_RECOG_LUCYKILA(obj) \
 		G_TYPE_CHECK_INSTANCE_CAST(obj,G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA,IbusHandwriteRecogLucyKila)
 
-
-struct _IbusHandwriteRecogLucyKila{
-	IbusHandwriteRecog	parent;
-	GString		*		input; // 由笔画构成的，用来查笔画表的字符串
-	void		* 		start_ptr; //指向表的地址
-	size_t				items_count; //表项数
-	size_t				table_size; // 表大小
-	size_t				maped_size; // 分配的内存大小
+struct _MATCHED{
+  char  code[64-16];
+  char  hanzi[16];
 };
 
-struct _IbusHandwriteRecogLucyKilaClass{
+struct _IbusHandwriteRecogLucyKila
+{
+	IbusHandwriteRecog parent;
+	GString * input; // 由笔画构成的，用来查笔画表的字符串
+	void * start_ptr; //指向表的地址
+	size_t items_count; //表项数
+	size_t table_size; // 表大小
+	size_t maped_size; // 分配的内存大小
+};
+
+struct _IbusHandwriteRecogLucyKilaClass
+{
 	IbusHandwriteRecogClass parent;
 	void (* parentdestroy)(IbusHandwriteRecog *object);
 };
 
 static void ibus_handwrite_recog_lucykila_init(IbusHandwriteRecogLucyKila*obj);
-static void ibus_handwrite_recog_lucykila_class_init(IbusHandwriteRecogLucyKilaClass* klass);
-
+static void ibus_handwrite_recog_lucykila_class_init(
+		IbusHandwriteRecogLucyKilaClass* klass);
 
 static char * nextline(char * ptr);
+static gint mysort(gconstpointer a, gconstpointer b);
 
 static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj, int way, ...)
 {
@@ -57,8 +66,6 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj, int way, ...)
 	char *preserve, *ptr2;
 	char * p;
 	int preservesize;
-
-	puts(__func__);
 
 	//打开表
 	int f = open(tablefile, O_RDONLY);
@@ -103,14 +110,124 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj, int way, ...)
 	munmap(preserve, state.st_size);
 
 	obj->maped_size = preservesize;
-	obj->table_size = ptr2 - preserve;
+	obj->table_size = obj->items_count*64;
 	return 0;
 }
 
+void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
+{
+	IbusHandwriteRecogLucyKila * me;
+
+	me = IBUS_HANDWRITE_RECOG_LUCYKILA(obj);
+
+	if(obj->strokes->len == 0)
+	{
+		me->input= g_string_truncate(me->input,0);
+		return ;
+	}
+
+	LineStroke laststrok =	g_array_index(obj->strokes,LineStroke,obj->strokes->len-1);
+
+	GdkPoint startpoint;
+	GdkPoint endpoint;
+
+	startpoint = laststrok.points[0];
+
+	endpoint = laststrok.points[laststrok.segments - 1];
+
+	//检测输入的笔画，h ? s ? p? z ? n?
+
+	//有米有折点
+
+
+	//米有折点
+
+	//首先，比较 起点和终点的 斜率
+
+	int x = startpoint.x - endpoint.x;
+	int y = startpoint.y - endpoint.y;
+
+	float xielv = ((float) startpoint.x - (float) endpoint.x)
+			/ ((float) startpoint.y - (float) endpoint.y);
+
+	if ((atan2(y, x) > 0) || (atan2(y, x) < -2.9))
+	{
+		printf("h ?\n");
+		me->input = g_string_append_c(me->input,'h');
+	}
+	else if ((atan2(y, x) < -1.4 ) && (atan2(y, x) > -1.7 ))
+	{
+		printf("s  ?\n");
+		me->input = g_string_append_c(me->input,'s');
+
+	}
+	else if (atan2(y, x) < -2)
+	{
+		printf("n ?\n");
+		me->input = g_string_append_c(me->input,'n');
+	}
+	else if (atan2(y, x) < -0.5)
+	{
+		printf("p  ?\n");
+		me->input = g_string_append_c(me->input,'p');
+	}
+}
 
 static gboolean ibus_handwrite_recog_lucykila_domatch(IbusHandwriteRecog*obj,int want)
 {
-	return TRUE;
+	IbusHandwriteRecogLucyKila * me;
+	MATCHED mt;
+	char * ptr, *start_ptr, *p;
+	int i, size = 0;
+
+	me = IBUS_HANDWRITE_RECOG_LUCYKILA(obj);
+
+	if(me->input->len == 0)
+		return 0;
+
+	GArray * result  = g_array_new(TRUE,TRUE,sizeof(MATCHED));
+		puts(__func__);
+
+	for (i = 0 , ptr = me->start_ptr ; i < me->items_count ; ++i , ptr+=64)
+	{
+		if (memcmp(ptr, me->input->str, me->input->len) == 0)
+		{
+			memset(&mt, 0, 64);
+			p = ptr;
+			while (*p != ' ' && *p != '\t')
+				++p;
+			memcpy(mt.code, ptr, p - ptr);
+			while (*p == ' ' || *p == '\t')
+				++p;
+			strcpy(mt.hanzi, p);
+			result = g_array_append_vals(result, &mt , 1 );
+			size++;
+		}
+		if (size >= want)
+			break;
+	}
+
+	puts(__func__);
+
+	//调节顺序
+	g_array_sort(result, mysort);
+
+	//载入 matched
+	MatchedChar mc;
+
+	obj->matched = g_array_set_size(obj->matched,0);
+
+	for( i =0; i < size ;++i)
+	{
+		mt = g_array_index(result,MATCHED,i);
+
+		strcpy(mc.chr , mt.hanzi);
+		obj->matched = g_array_append_val(obj->matched,mc);
+	}
+
+	g_array_free(result,TRUE);
+
+	return size;
 }
 
 static void ibus_handwrite_recog_lucykila_init(IbusHandwriteRecogLucyKila*obj)
@@ -125,19 +242,22 @@ static void ibus_handwrite_recog_lucykila_init(IbusHandwriteRecogLucyKila*obj)
 static void ibus_handwrite_recog_lucykila_destory(IbusHandwriteRecog*obj)
 {
 	IbusHandwriteRecogLucyKila * thisobj = IBUS_HANDWRITE_RECOG_LUCYKILA(obj);
-	g_string_free(thisobj->input,TRUE);
-	munmap(thisobj->start_ptr,thisobj->maped_size);
+	g_string_free(thisobj->input, TRUE);
+	munmap(thisobj->start_ptr, thisobj->maped_size);
 
 	IBUS_HANDWRITE_RECOG_LUCYKILA_GET_CLASS(obj)->parentdestroy(obj);
 }
 
-static void ibus_handwrite_recog_lucykila_class_init(IbusHandwriteRecogLucyKilaClass* klass)
+static void ibus_handwrite_recog_lucykila_class_init(
+		IbusHandwriteRecogLucyKilaClass* klass)
 {
-	IbusHandwriteRecogClass * parent = (IbusHandwriteRecogClass*)(klass);
-	parent->load_table = (int (*)(IbusHandwriteRecog*, int way, ...)) lucykila_open_table;
+	IbusHandwriteRecogClass * parent = (IbusHandwriteRecogClass*) (klass);
+	parent->load_table
+			= (int(*)(IbusHandwriteRecog*, int way, ...)) lucykila_open_table;
 	klass->parentdestroy = parent->destroy;
 	parent->destroy = ibus_handwrite_recog_lucykila_destory;
-	parent->domatch =ibus_handwrite_recog_lucykila_domatch;
+	parent->domatch = ibus_handwrite_recog_lucykila_domatch;
+	parent->change_stroke = ibus_handwrite_recog_change_stroke;
 }
 
 GType ibus_handwrite_recog_lucykila_get_type(void)
@@ -145,16 +265,16 @@ GType ibus_handwrite_recog_lucykila_get_type(void)
 	static const GTypeInfo type_info =
 	{ sizeof(IbusHandwriteRecogLucyKilaClass), (GBaseInitFunc) NULL,
 			(GBaseFinalizeFunc) NULL,
-			(GClassInitFunc) ibus_handwrite_recog_lucykila_class_init, NULL, NULL,
-			sizeof(IbusHandwriteRecogLucyKila), 0,
+			(GClassInitFunc) ibus_handwrite_recog_lucykila_class_init, NULL,
+			NULL, sizeof(IbusHandwriteRecogLucyKila), 0,
 			(GInstanceInitFunc) ibus_handwrite_recog_lucykila_init, };
 
 	static GType type = 0;
 
 	if (type == 0)
 	{
-		type = g_type_register_static(G_TYPE_IBUS_HANDWRITE_RECOG, "IbusHandwriteRecog_LucyKila",
-				&type_info, 0);
+		type = g_type_register_static(G_TYPE_IBUS_HANDWRITE_RECOG,
+				"IbusHandwriteRecog_LucyKila", &type_info, 0);
 
 	}
 	return type;
@@ -163,8 +283,19 @@ GType ibus_handwrite_recog_lucykila_get_type(void)
 static char *
 nextline(char * ptr)
 {
-  while (*ptr != '\n')
-    ++ptr;
-//  *ptr = 0;
-  return *ptr?++ptr:NULL;
+	while (*ptr != '\n')
+		++ptr;
+	//  *ptr = 0;
+	return *ptr ? ++ptr : NULL;
+}
+
+static gint
+mysort(gconstpointer a, gconstpointer b)
+{
+  MATCHED * pa ,  *pb;
+  pa = (MATCHED*) a;
+  pb = (MATCHED*) b;
+//  g_printf("match sort %s %s\n",pa->hanzi,pb->hanzi);
+
+  return (strlen(pa->code) ) - (strlen(pb->code) ) ;
 }
