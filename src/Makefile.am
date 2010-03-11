@@ -29,13 +29,12 @@ test: ibus-engine-handwrite
 AM_CFLAGS= @GTK2_CFLAGS@ @IBUS_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\"  \
 			-DMODEFILE=\"@MODEFILE@\" -DTABLEFILE=\"$(TABLEFILE)\"
 
-AM_LDFLAGS = @IBUS_LIBS@ @GTK2_LIBS@ @ZINNIA_LIBS@ 
+AM_LDFLAGS = @IBUS_LIBS@ @GTK2_LIBS@
 
 libexec_PROGRAMS = ibus-engine-handwrite
 
 ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	prase.c prase.h \
 					  UI_gtk.c \
-					  handrecog_zinnia.c \
 					  handrecog_lucykila.c \
 					  handrecog.c \
 					  handrecog.h \
