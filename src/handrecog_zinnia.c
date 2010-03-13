@@ -6,6 +6,7 @@
  */
 #include <string.h>
 #include <zinnia.h>
+#include "engine.h"
 #include "handrecog.h"
 
 typedef struct _IbusHandwriteRecogZinnia IbusHandwriteRecogZinnia;
@@ -36,18 +37,13 @@ static void ibus_handwrite_recog_zinnia_class_init(IbusHandwriteRecogZinniaClass
 
 static int zinnia_open_model(IbusHandwriteRecogZinnia*obj,int way,gchar * filename)
 {
-	if (way == IBUS_HANDWRITE_RECOG_TABLE_FROM_FILENAME)
+	if (!zinnia_recognizer_open(obj->recognizer, modelfile))
 	{
-		if (!zinnia_recognizer_open(obj->recognizer, filename))
-		{
-			fprintf(stderr, "ERROR: %s\n", zinnia_recognizer_strerror(
-					obj->recognizer));
-			return -1;
-		}
-		return 0;
+		fprintf(stderr, "ERROR: %s\n", zinnia_recognizer_strerror(
+				obj->recognizer));
+		return -1;
 	}
-	else
-		return - 1;
+	return 0;
 }
 
 

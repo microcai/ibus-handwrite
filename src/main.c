@@ -108,9 +108,7 @@ int main(int argc, char* argv[])
 		{ 0 };
 		char iconfile[4096] =
 		{ 0 };
-		realpath(argv[0], exefile);
-		realpath(icon_file, iconfile);
-		init_outside(iconfile, exefile);
+		init_outside(realpath(icon_file, iconfile), realpath(argv[0], exefile));
 		printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
 	}
 	else
