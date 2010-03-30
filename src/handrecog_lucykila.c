@@ -146,7 +146,7 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 	};
 
 
-	if( abs(startpoint.x - endpoint.x ) > 7 && abs(startpoint.y - endpoint.y ) >7  )
+	if( abs(startpoint.x - endpoint.x ) > 17 && abs(startpoint.y - endpoint.y ) > 7  )
 	{
 		int init=0;
 
