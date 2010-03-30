@@ -19,5 +19,5 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-EXTRA_DIST = licykila_识别原理.tex
+EXTRA_DIST = lucykila_识别原理.tex
 
