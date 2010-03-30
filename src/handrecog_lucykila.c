@@ -139,15 +139,27 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 	//检测输入的笔画，h ? s ? p? z ? n?
 
 	//有米有折点
-	GdkRectangle ret = { startpoint.x,startpoint.y, endpoint.x, endpoint.y};
+	GdkRectangle ret =
+	{
+			MIN(startpoint.x,endpoint.x), MIN(endpoint.y,startpoint.y),
+			abs(endpoint.x - startpoint.x), abs(endpoint.y - startpoint.y)
+	};
+
 
 	if( abs(startpoint.x - endpoint.x ) > 7 && abs(startpoint.y - endpoint.y ) >7  )
 	{
+		int init=0;
+
 		printf("is z!!!?\n");
 		GdkRegion * rg = gdk_region_rectangle(&ret);
 		for(i=1;i < laststrok.segments -1 ;++i)
 		{
 			if(!gdk_region_point_in(rg,laststrok.points[i].x,laststrok.points[i].y))
+			{
+				init ++;
+			}
+
+			if(init>5)
 			{
 				printf("god z!!!\n");
 				me->input = g_string_append_c(me->input,'z');
