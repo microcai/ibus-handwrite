@@ -116,7 +116,11 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj, int way, ...)
 
 void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 {
+	GdkPoint startpoint;
+	GdkPoint endpoint;
+
 	IbusHandwriteRecogLucyKila * me;
+	int i;
 
 	me = IBUS_HANDWRITE_RECOG_LUCYKILA(obj);
 
@@ -128,9 +132,6 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 
 	LineStroke laststrok =	g_array_index(obj->strokes,LineStroke,obj->strokes->len-1);
 
-	GdkPoint startpoint;
-	GdkPoint endpoint;
-
 	startpoint = laststrok.points[0];
 
 	endpoint = laststrok.points[laststrok.segments - 1];
@@ -138,7 +139,24 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 	//检测输入的笔画，h ? s ? p? z ? n?
 
 	//有米有折点
+	GdkRectangle ret = { startpoint.x,startpoint.y, endpoint.x, endpoint.y};
 
+	if( abs(startpoint.x - endpoint.x ) > 7 && abs(startpoint.y - endpoint.y ) >7  )
+	{
+		printf("is z!!!?\n");
+		GdkRegion * rg = gdk_region_rectangle(&ret);
+		for(i=0;i < laststrok.segments ;++i)
+		{
+			if(!gdk_region_point_in(rg,laststrok.points[i].x,laststrok.points[i].y))
+			{
+				printf("god z!!!\n");
+				me->input = g_string_append_c(me->input,'z');
+				gdk_region_destroy(rg);
+				return ;
+			}
+		}
+		gdk_region_destroy(rg);
+	}
 
 	//米有折点
 
