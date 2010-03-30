@@ -235,8 +235,6 @@ static gboolean ibus_handwrite_recog_lucykila_domatch(IbusHandwriteRecog*obj,int
 			result = g_array_append_vals(result, &mt , 1 );
 			size++;
 		}
-		if (size >= want)
-			break;
 	}
 
 	puts(__func__);
