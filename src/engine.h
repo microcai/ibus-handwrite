@@ -40,6 +40,5 @@ struct _IBusHandwriteEngineClass
 
 typedef struct _RESULTCHAR RESULTCHAR;
 
-extern char modelfile[1024] ; //= "data/handwriting-zh_CN.model";
-extern char tablefile[1024] ; //= "data/table.txt";
+extern gchar * tablefile;
 #endif

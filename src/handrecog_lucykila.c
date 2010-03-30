@@ -145,7 +145,7 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 	{
 		printf("is z!!!?\n");
 		GdkRegion * rg = gdk_region_rectangle(&ret);
-		for(i=0;i < laststrok.segments ;++i)
+		for(i=1;i < laststrok.segments -1 ;++i)
 		{
 			if(!gdk_region_point_in(rg,laststrok.points[i].x,laststrok.points[i].y))
 			{
@@ -157,6 +157,8 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 		}
 		gdk_region_destroy(rg);
 	}
+
+	printf("NO Z!");
 
 	//米有折点
 

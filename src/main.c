@@ -13,7 +13,6 @@
 #define N_(String) gettext_noop (String)
 
 #include "engine.h"
-#include "prase.h"
 
 static IBusBus *bus = NULL;
 static IBusFactory *factory = NULL;
@@ -23,17 +22,7 @@ static void ibus_disconnected_cb(IBusBus *bus, gpointer user_data)
 	gtk_main_quit();
 }
 
-char tablefile[1024]=  TABLEFILE ;
-char modelfile[1024] = MODEFILE ; //"/usr/share/tegaki/models/zinnia/handwriting-zh_CN.model" modelfile ;//"/data/handwriting-zh_CN.model";
-static int have_ibus;
-static char icon_file[4096] = "icons/ibus-handwrite.svg";
-struct parameter_tags paramters[] =
-{
-{ "--ibus", (const char*) &have_ibus, NULL, sizeof(have_ibus), 6, BOOL_both },
-{ "--icon", (const char*) icon_file, "--icon the icon file", sizeof(icon_file), 6,	STRING },
-{ "--model", (const char*) modelfile, "--model the model file", sizeof(modelfile), 7,	STRING },
-{ "--table", (const char*) tablefile, "--table the table file", sizeof(tablefile), 7,	STRING },
-{ 0 } };
+char *tablefile=  TABLEFILE ;
 
 static void init_inside()
 {
@@ -92,15 +81,34 @@ static void init_outside(const char * iconfile, const char *exefile)
 
 int main(int argc, char* argv[])
 {
-	gtk_init(&argc, &argv);
-	ibus_init();
-	ParseParameters(&argc, &argv, paramters);
+	GError * err = NULL;
+
+	gboolean have_ibus=FALSE;
+
+	gchar * icon_file = "icons/ibus-handwrite.svg";
+
+
 	setlocale(LC_ALL, "");
 	gtk_set_locale();
 	textdomain(GETTEXT_PACKAGE);
 #ifdef DEBUG
 	bindtextdomain(GETTEXT_PACKAGE, "/tmp/usr/share/locale");
 #endif
+
+	GOptionEntry args[] =
+	{
+			{"ibus",'\0',0,G_OPTION_ARG_NONE,&have_ibus},
+			{"icon",'\0',0,G_OPTION_ARG_STRING,&icon_file,_("the icon file"),N_("icon file")},
+			{"table",'\0',0,G_OPTION_ARG_STRING,&tablefile,_("set table file path"),N_("tablefile")},
+			{0}
+	};
+
+	if(G_UNLIKELY(!gtk_init_with_args(&argc, &argv,PACKAGE_STRING,args,NULL,&err)))
+	{
+		g_error("%s",err->message);
+	}
+
+	ibus_init();
 
 	if (!have_ibus)
 	{

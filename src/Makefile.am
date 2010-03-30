@@ -23,7 +23,6 @@ TABLEFILE = $(pkgdatadir)/data/table.txt
 test: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
 		--icon $(top_srcdir)/icons/ibus-handwrite.svg \
-		--model @TEST_MODEFILE@ \
 		--table $(top_srcdir)/data/table.txt
 
 AM_CFLAGS= @GTK2_CFLAGS@ @IBUS_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\"  \
@@ -33,7 +32,7 @@ AM_LDFLAGS = @IBUS_LIBS@ @GTK2_LIBS@
 
 libexec_PROGRAMS = ibus-engine-handwrite
 
-ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	prase.c prase.h \
+ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	\
 					  UI_gtk.c \
 					  handrecog_lucykila.c \
 					  handrecog.c \
