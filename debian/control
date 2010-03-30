@@ -2,13 +2,13 @@ Source: ibus-handwrite
 Section: i18n
 Priority: optional
 Maintainer: microcai <microcaicai@gmail.com>
-Build-Depends: debhelper (>= 7), autotools-dev ,libibus-dev, libgtk2.0-dev , libglib2.0-dev , libzinnia-dev
+Build-Depends: debhelper (>= 7), autotools-dev ,libibus-dev, libgtk2.0-dev , libglib2.0-dev 
 Standards-Version: 1.0.0
 Homepage: http://ibus-handwrite.googlecode.com
 
 Package: ibus-handwrite
 Architecture: any
-Depends: libibus1 , libzinnia0 , libgtk2.0-0 , tegaki-zinnia-simplified-chinese
+Depends: libibus1 , libgtk2.0-0 
 Suggests: 
 Description: ibus-handwrite is a handwrite recg 
 
