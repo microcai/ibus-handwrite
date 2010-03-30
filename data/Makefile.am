@@ -24,22 +24,4 @@ modelsdir = $(pkgdatadir)/data
 
 models_DATA = table.txt
 
-if HAVE_TOMOE
-
-else
-
-EXTRA_DIST += handwriting-zh_CN.model
-
-models_DATA +=  $(srcdir)/handwriting-zh_CN.model 
-# $(srcdir)/handwriting-ja.model
-
-
-
-#$(srcdir)/handwriting-ja.model :
-#	cd $(srcdir) && wget http://ibus-handwrite.googlecode.com/svn/files/handwriting-ja.model
-
-$(srcdir)/handwriting-zh_CN.model:
-	cd $(srcdir) && wget -c http://ibus-handwrite.googlecode.com/svn/files/handwriting-zh_CN.model
-
-endif
 			
