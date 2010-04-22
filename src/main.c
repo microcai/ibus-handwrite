@@ -19,7 +19,7 @@ static IBusFactory *factory = NULL;
 
 char *tablefile=  TABLEFILE ;
 char icondir[4096]= PKGDATADIR"/icons";
-char lang[20]	= "zh_CH";
+char lang[20]	= "zh_CN";
 
 int main(int argc, char* argv[])
 {
