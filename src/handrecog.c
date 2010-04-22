@@ -109,8 +109,9 @@ static void ibus_handwrite_recog_init(IbusHandwriteRecog*obj)
 	obj->strokes = g_array_sized_new(TRUE,TRUE,sizeof(LineStroke),0);
 }
 
-static void ibus_handwrite_recog_destory(IbusHandwriteRecog*obj)
+static void ibus_handwrite_recog_destory(GObject * gobj)
 {
+	IbusHandwriteRecog*obj = (IbusHandwriteRecog*)gobj;
 	int i;
 	puts(__func__);
 
@@ -123,31 +124,18 @@ static void ibus_handwrite_recog_destory(IbusHandwriteRecog*obj)
 		g_free(g_array_index(obj->strokes,LineStroke,i).points);
 	}
 	g_array_free(obj->strokes, TRUE);
-}
 
-static void my_dispose(GObject * obj)
-{
-	g_signal_emit(obj,IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->singal[0],0);
-	IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->dispose(obj);
+	IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->destroy(gobj);
 }
-
 
 static void ibus_handwrite_recog_class_init(IbusHandwriteRecogClass* klass)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-	klass->dispose = gobject_class->dispose;
-
-	gobject_class->dispose = my_dispose ;
-
 	klass->change_stroke = NULL;
 	klass->domatch = NULL;
-	klass->destroy = ibus_handwrite_recog_destory ;
-
-    klass->singal[0] =  g_signal_new("destroy", G_TYPE_FROM_CLASS (gobject_class),
-    		G_SIGNAL_RUN_LAST,
-    		G_STRUCT_OFFSET (IbusHandwriteRecogClass, destroy), NULL, NULL,
-			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	klass->destroy =  gobject_class->finalize;
+	gobject_class->finalize = ibus_handwrite_recog_destory;
 }
 
 

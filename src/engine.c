@@ -127,7 +127,9 @@ static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
 
 static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 {
-	extern char iconfile[4096];
+	extern char icondir[4096];
+
+	gchar * iconfile = g_strdup_printf("%s/ibus-handwrite.svg",icondir);
 
 	g_debug("icon file is %s",iconfile);
 
@@ -137,6 +139,8 @@ static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 			ibus_text_new_from_static_string(_("engine")), iconfile,
 			ibus_text_new_from_static_string(_("click to set engine")), TRUE, TRUE,
 			PROP_STATE_UNCHECKED, NULL);
+
+	g_free(iconfile);
 
 	ibus_prop_list_append(pl, p);
 

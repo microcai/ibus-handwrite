@@ -47,7 +47,7 @@ struct _IbusHandwriteRecogLucyKila
 struct _IbusHandwriteRecogLucyKilaClass
 {
 	IbusHandwriteRecogClass parent;
-	void (* parentdestroy)(IbusHandwriteRecog *object);
+	void (* parentdestroy)(GObject *object);
 };
 
 static void ibus_handwrite_recog_lucykila_init(IbusHandwriteRecogLucyKila*obj);
@@ -269,23 +269,27 @@ static void ibus_handwrite_recog_lucykila_init(IbusHandwriteRecogLucyKila*obj)
 	obj->maped_size = 0; // 分配的内存大小
 }
 
-static void ibus_handwrite_recog_lucykila_destory(IbusHandwriteRecog*obj)
+static void ibus_handwrite_recog_lucykila_destory(GObject*obj)
 {
 	IbusHandwriteRecogLucyKila * thisobj = IBUS_HANDWRITE_RECOG_LUCYKILA(obj);
 	g_string_free(thisobj->input, TRUE);
 	munmap(thisobj->start_ptr, thisobj->maped_size);
 
-	IBUS_HANDWRITE_RECOG_LUCYKILA_GET_CLASS(obj)->parentdestroy(obj);
+	IBUS_HANDWRITE_RECOG_LUCYKILA_GET_CLASS(obj)->parentdestroy((GObject*)obj);
 }
 
 static void ibus_handwrite_recog_lucykila_class_init(
 		IbusHandwriteRecogLucyKilaClass* klass)
 {
 	IbusHandwriteRecogClass * parent = (IbusHandwriteRecogClass*) (klass);
-	klass->parentdestroy = parent->destroy;
-	parent->destroy = ibus_handwrite_recog_lucykila_destory;
+
 	parent->domatch = ibus_handwrite_recog_lucykila_domatch;
 	parent->change_stroke = ibus_handwrite_recog_change_stroke;
+
+	klass->parentdestroy = G_OBJECT_CLASS(klass)->finalize ;
+
+	G_OBJECT_CLASS(klass)->finalize = ibus_handwrite_recog_lucykila_destory;
+
 }
 
 GType ibus_handwrite_recog_lucykila_get_type(void)

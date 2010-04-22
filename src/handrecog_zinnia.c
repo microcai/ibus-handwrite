@@ -32,7 +32,7 @@ struct _IbusHandwriteRecogZinnia{
 
 struct _IbusHandwriteRecogZinniaClass{
 	IbusHandwriteRecogClass parent;
-	void (* parentdestroy)(IbusHandwriteRecog *object);
+	void (* parentdestroy)(GObject *object);
 };
 
 static void ibus_handwrite_recog_zinnia_init(IbusHandwriteRecogZinnia*obj);
@@ -128,7 +128,7 @@ static void ibus_handwrite_recog_zinnia_init(IbusHandwriteRecogZinnia*obj)
 
 }
 
-static void ibus_handwrite_recog_zinnia_destory(IbusHandwriteRecog*obj)
+static void ibus_handwrite_recog_zinnia_destory(GObject*obj)
 {
 	IbusHandwriteRecogZinnia * thisobj = IBUS_HANDWRITE_RECOG_ZINNIA(obj);
 
@@ -140,9 +140,12 @@ static void ibus_handwrite_recog_zinnia_destory(IbusHandwriteRecog*obj)
 static void ibus_handwrite_recog_zinnia_class_init(IbusHandwriteRecogZinniaClass* klass)
 {
 	IbusHandwriteRecogClass * parent = (IbusHandwriteRecogClass*)(klass);
-	klass->parentdestroy = parent->destroy;
+	klass->parentdestroy = G_OBJECT_CLASS(klass)->finalize;
+
 	parent->destroy = ibus_handwrite_recog_zinnia_destory;
 	parent->domatch =ibus_handwrite_recog_zinnia_domatch;
+
+	G_OBJECT_CLASS(klass)->finalize = ibus_handwrite_recog_zinnia_destory;
 }
 
 GType ibus_handwrite_recog_zinnia_get_type(void)

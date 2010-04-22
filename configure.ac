@@ -95,6 +95,9 @@ PKG_CHECK_MODULES(ALL_NEED, [
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION(0.16.1)
 
+AC_DEFINE_UNQUOTED(ICONDIR,${prefix}/ibus/icons,[icon filedir])
+
+
 AC_DEFINE(MICROCAI_WITHEMAIL,"microcai@fedoraproject.org",[author microcai and his email])
 # OUTPUT files
 AC_CONFIG_FILES(po/Makefile.in

@@ -40,7 +40,7 @@ struct _IbusHandwriteRecogClass{
 	guint singal[2];
 
 	/* signals */
-    void (* destroy)        (IbusHandwriteRecog*object);
+    void (* destroy)        (GObject*object);
 
     /*numbers*/
 	void (*change_stroke)(IbusHandwriteRecog*);
