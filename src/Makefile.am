@@ -22,7 +22,7 @@ TABLEFILE = $(pkgdatadir)/data/table.txt
 
 test: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
-		--icon $(top_srcdir)/icons/ibus-handwrite.svg \
+		--icondir $(top_srcdir)/icons/ \
 		--table $(top_srcdir)/data/table.txt
 
 AM_CPPFLAGS= @ALL_NEED_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\" -DTABLEFILE=\"$(TABLEFILE)\"
