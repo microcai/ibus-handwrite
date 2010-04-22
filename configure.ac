@@ -56,7 +56,7 @@ AC_ARG_WITH(zinnia-tomoe,[AC_HELP_STRING([--with-zinnia-tomoe=[[dir]]],[specify 
 		AC_DEFINE_UNQUOTED(TOMOE_DATA_DIR,"${tomoedir}",[the dir that hold zinnia-tomoe data file])
 	],[
 			AS_IF([test "x${enable_zinnia}" = "xyes"],
-			[AC_MSG_WARN(zinnia engine disabled duto the missing --with-zinnia-tomoe)])	
+			[AC_MSG_WARN(zinnia engine disabled due to the missing --with-zinnia-tomoe)])	
 			enable_zinnia=no;
 ])
 
