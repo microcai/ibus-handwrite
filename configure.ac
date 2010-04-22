@@ -114,7 +114,8 @@ AC_CONFIG_FILES(po/Makefile.in
 Makefile
 ibus-handwrite.spec
 src/Makefile
-src/handwrite.xml.in
+src/handwrite-zh.xml.in
+src/handwrite-jp.xml.in
 icons/Makefile
 data/Makefile
 doc/Makefile

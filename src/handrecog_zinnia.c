@@ -40,8 +40,14 @@ static void ibus_handwrite_recog_zinnia_class_init(IbusHandwriteRecogZinniaClass
 
 static int zinnia_open_model(IbusHandwriteRecogZinnia*obj)
 {
+	const char * tlang="zh_CN";
+
 	g_debug(("using zinnia!!!"));
-	gchar * file = g_strdup_printf("%s/handwriting-zh_CN.model",TOMOE_DATA_DIR);
+#ifdef WITH_ZINNIA
+	tlang = lang;
+#endif
+
+	gchar * file = g_strdup_printf("%s/handwriting-%s.model",TOMOE_DATA_DIR,tlang);
 	if (!zinnia_recognizer_open(obj->recognizer, file))
 	{
 		fprintf(stderr,  "ERROR: %s\n", zinnia_recognizer_strerror(

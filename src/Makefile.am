@@ -24,7 +24,13 @@ test: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
 		--icondir $(top_srcdir)/icons/ \
 		--table $(top_srcdir)/data/table.txt
-
+if WITH_ZINNIA		
+test-jp: ibus-engine-handwrite
+	$(builddir)/ibus-engine-handwrite \
+		--icondir $(top_srcdir)/icons/ \
+		--table $(top_srcdir)/data/table.txt \
+		--lang=jp
+endif		
 AM_CPPFLAGS= @ALL_NEED_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\" -DTABLEFILE=\"$(TABLEFILE)\"
 
 LIBS += @ALL_NEED_LIBS@
@@ -45,17 +51,28 @@ AM_CPPFLAGS += -DWITH_ZINNIA
 endif					  
 					  
 
-component_DATA = handwrite.xml 
+component_DATA = handwrite-zh.xml
+if WITH_ZINNIA
+component_DATA += handwrite-jp.xml
+endif
 
 componentdir = @datadir@/ibus/component
 
-EXTRA_DIST = handwrite.xml.in 
+EXTRA_DIST = handwrite-zh.xml.in handwrite-jp.xml.in
 
 CLEANFILES = \
 	handwrite.xml \
 	$(NULL)
 
-handwrite.xml: handwrite.xml.in
+handwrite-zh.xml: handwrite-zh.xml.in
+	( \
+		libexecdir=${libexecdir}; \
+		pkgdatadir=${pkgdatadir}; \
+		s=`cat $<`; \
+		eval "echo \"$${s}\""; \
+	) > $@
+
+handwrite-jp.xml: handwrite-jp.xml.in
 	( \
 		libexecdir=${libexecdir}; \
 		pkgdatadir=${pkgdatadir}; \

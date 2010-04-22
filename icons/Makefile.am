@@ -25,5 +25,5 @@ icons_DATA = \
 iconsdir = $(pkgdatadir)/icons
 
 EXTRA_DIST = \
-	ibus-handwrite.svg \
+	ibus-handwrite.svg switch.svg \
 	$(NULL)

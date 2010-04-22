@@ -46,7 +46,11 @@ DISTCLEANFILES = \
 	
 test: src/Makefile
 	cd src && $(MAKE) $@
-		
+
+if WITH_ZINNIA		
+test-jp: src/Makefile
+	cd src && $(MAKE) $@
+endif				
 
 rpm: dist @PACKAGE_NAME@.spec
 	rpmbuild -bb \

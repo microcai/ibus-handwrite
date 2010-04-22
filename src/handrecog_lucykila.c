@@ -261,12 +261,12 @@ static gboolean ibus_handwrite_recog_lucykila_domatch(IbusHandwriteRecog*obj,int
 
 static void ibus_handwrite_recog_lucykila_init(IbusHandwriteRecogLucyKila*obj)
 {
-	lucykila_open_table(obj);
 	obj->input = g_string_new("");
 	obj->start_ptr; //指向表的地址
 	obj->items_count = 0; //表项数
 	obj->table_size = 0; // 表大小
 	obj->maped_size = 0; // 分配的内存大小
+	lucykila_open_table(obj);
 }
 
 static void ibus_handwrite_recog_lucykila_destory(GObject*obj)

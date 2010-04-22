@@ -96,8 +96,15 @@ static void ibus_handwrite_engine_init(IBusHandwriteEngine *handwrite)
 	G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA;
 	G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA;
 	//先注册2个引擎
-
 	handwrite->engine_type = G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA ;
+
+#ifdef WITH_ZINNIA
+	if( strcmp(lang,"jp") ==0 || strcmp(lang,"ja")==0 )
+	{
+		handwrite->engine_type = G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA;
+	}
+#endif
+
 	handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
 }
 
@@ -127,9 +134,18 @@ static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
 
 static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 {
+	UI_show_ui(engine);
+
+#ifdef WITH_ZINNIA
+	if( strcmp(lang,"jp") ==0 || strcmp(lang,"ja")==0 )
+	{
+		return ;
+	}
+#endif
+
 	extern char icondir[4096];
 
-	gchar * iconfile = g_strdup_printf("%s/ibus-handwrite.svg",icondir);
+	gchar * iconfile = g_strdup_printf("%s/switch.svg",icondir);
 
 	g_debug("icon file is %s",iconfile);
 
@@ -146,7 +162,6 @@ static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 
 	ibus_engine_register_properties(IBUS_ENGINE(engine), pl);
 
-	UI_show_ui(engine);
 }
 
 static void ibus_handwrite_engine_focus_out(IBusHandwriteEngine *engine)

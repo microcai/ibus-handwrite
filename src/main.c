@@ -19,6 +19,7 @@ static IBusFactory *factory = NULL;
 
 char *tablefile=  TABLEFILE ;
 char icondir[4096]= PKGDATADIR"/icons";
+char lang[20]	= "zh_CH";
 
 int main(int argc, char* argv[])
 {
@@ -28,6 +29,8 @@ int main(int argc, char* argv[])
 	GError * err = NULL;
 
 	gboolean have_ibus=FALSE;
+
+	const gchar * language="zh";
 
 	const gchar * icon_dir = "icons/ibus-handwrite.svg";
 
@@ -43,6 +46,9 @@ int main(int argc, char* argv[])
 			{"ibus",'\0',0,G_OPTION_ARG_NONE,&have_ibus},
 			{"icondir",'\0',0,G_OPTION_ARG_STRING,&icon_dir,_("the icon file"),N_("icon file")},
 			{"table",'\0',0,G_OPTION_ARG_STRING,&tablefile,_("set table file path"),N_("tablefile")},
+#ifdef WITH_ZINNIA
+			{"lang",'\0',0,G_OPTION_ARG_STRING,&language,_("set languate, accept zh and jp"),N_("lang")},
+#endif
 			{0}
 	};
 
@@ -50,6 +56,20 @@ int main(int argc, char* argv[])
 	{
 		g_error("%s",err->message);
 	}
+
+#ifdef WITH_ZINNIA
+	if(strcmp(language,"zh")==0 ||strcmp(language,"zh_CN") ==0 )
+	{
+
+	}else if( strcmp(language,"jp") ==0 || strcmp(language,"ja")==0 )
+	{
+		g_strlcpy(lang,"ja",20);
+	}else
+	{
+		g_error("pass jp or zh to --lang!");
+	}
+
+#endif
 
 	ibus_init();
 	realpath(icon_dir, icondir);
@@ -76,7 +96,7 @@ int main(int argc, char* argv[])
 		gchar * iconfile =  g_strdup_printf("%s/ibus-handwrite.svg",icondir);
 
 		desc = ibus_engine_desc_new("handwrite", "handwrite",
-				_("hand write recognizer"), "zh_CN", "GPL",
+				_("hand write recognizer"), lang, "GPL",
 				MICROCAI_WITHEMAIL, iconfile, "us");
 
 		ibus_component_add_engine(component, desc);

@@ -41,4 +41,5 @@ struct _IBusHandwriteEngineClass
 typedef struct _RESULTCHAR RESULTCHAR;
 
 extern gchar * tablefile;
+extern char lang[20];
 #endif

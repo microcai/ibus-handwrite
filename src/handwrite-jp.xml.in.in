@@ -3,7 +3,7 @@
 <component>
 	<name>org.freedesktop.IBus.handwrite</name>
 	<description>HandWrite Component</description>
-	<exec>${libexecdir}/ibus-engine-handwrite --ibus</exec>
+	<exec>${libexecdir}/ibus-engine-handwrite --ibus --lang=jp</exec>
 	<version>@VERSION@</version>
 	<author>Microcai &lt;microcai AT fedoraproject DOT org &gt;</author>
 	<license>GPL</license>
@@ -13,7 +13,7 @@
 	<engines>
 		<engine>
 			<name>handwrite</name>
-			<language>zh_CN</language>
+			<language>ja</language>
 			<license>GPL</license>
 			<author>Microcai &lt;microcai AT fedoraproject DOT org &gt;</author>
 			<icon>${pkgdatadir}/icons/ibus-handwrite.svg</icon>

@@ -40,6 +40,9 @@ src/ibus-engine-handwrite
 debian/files
 debian/ibus-handwrite/
 debian/ibus-handwrite*
-
-
+src/handwrite-jp.xml
+src/handwrite-jp.xml.in
+src/handwrite-zh.xml
+src/handwrite-zh.xml.in
+src/handwrite-zh.xml.in.in
 po/
