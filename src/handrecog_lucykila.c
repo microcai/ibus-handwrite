@@ -23,7 +23,6 @@ typedef struct _IbusHandwriteRecogLucyKilaClass IbusHandwriteRecogLucyKilaClass;
 
 GType ibus_handwrite_recog_lucykila_get_type(void);
 
-#define G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA (ibus_handwrite_recog_lucykila_get_type())
 
 #define IBUS_HANDWRITE_RECOG_LUCYKILA_GET_CLASS(obj) \
 		G_TYPE_INSTANCE_GET_CLASS ((obj), G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA, IbusHandwriteRecogLucyKilaClass)
@@ -58,7 +57,7 @@ static void ibus_handwrite_recog_lucykila_class_init(
 static char * nextline(char * ptr);
 static gint mysort(gconstpointer a, gconstpointer b);
 
-static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj, int way, ...)
+static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj)
 {
 	struct stat state;
 	char * ptr;
@@ -262,6 +261,7 @@ static gboolean ibus_handwrite_recog_lucykila_domatch(IbusHandwriteRecog*obj,int
 
 static void ibus_handwrite_recog_lucykila_init(IbusHandwriteRecogLucyKila*obj)
 {
+	lucykila_open_table(obj);
 	obj->input = g_string_new("");
 	obj->start_ptr; //指向表的地址
 	obj->items_count = 0; //表项数
@@ -282,8 +282,6 @@ static void ibus_handwrite_recog_lucykila_class_init(
 		IbusHandwriteRecogLucyKilaClass* klass)
 {
 	IbusHandwriteRecogClass * parent = (IbusHandwriteRecogClass*) (klass);
-	parent->load_table
-			= (int(*)(IbusHandwriteRecog*, int way, ...)) lucykila_open_table;
 	klass->parentdestroy = parent->destroy;
 	parent->destroy = ibus_handwrite_recog_lucykila_destory;
 	parent->domatch = ibus_handwrite_recog_lucykila_domatch;

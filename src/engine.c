@@ -5,6 +5,12 @@
 #include "handrecog.h"
 #include "UI.h"
 
+#include <libintl.h>
+#define _(String) gettext (String)
+#define gettext_noop(String) String
+#define N_(String) gettext_noop (String)
+
+
 typedef void (* ibus_engine_callback)(IBusEngine *engine);
 
 /* functions prototype */
@@ -28,8 +34,8 @@ static gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine ,
 //static void ibus_handwrite_engine_page_down(IBusEngine *engine);
 //static void ibus_handwrite_engine_cursor_up(IBusEngine *engine);
 //static void ibus_handwrite_engine_cursor_down(IBusEngine *engine);
-//static void ibus_handwrite_property_activate(IBusEngine *engine,
-//		const gchar *prop_name, gint prop_state);
+static void ibus_handwrite_property_activate(IBusEngine *engine,
+		const gchar *prop_name, guint prop_state);
 //static void ibus_handwrite_engine_property_show(IBusEngine *engine,
 //		const gchar *prop_name);
 //static void ibus_handwrite_engine_property_hide(IBusEngine *engine,
@@ -78,15 +84,21 @@ static void ibus_handwrite_engine_class_init(IBusHandwriteEngineClass *klass)
 	engine_class->focus_out
 			= (ibus_engine_callback) ibus_handwrite_engine_focus_out;
 	engine_class->reset = (ibus_engine_callback) ibus_handwrite_engine_reset;
+
+	engine_class->property_activate = ibus_handwrite_property_activate;
+
 	klass->commit_text = ibus_handwrite_engine_commit_text;
 }
 
 static void ibus_handwrite_engine_init(IBusHandwriteEngine *handwrite)
 {
 //	puts(__func__);
-	handwrite->engine = ibus_handwrite_recog_new(IBUS_HANDWRITE_RECOG_ENGINE_LUCYKILA);
-	ibus_handwrite_recog_load_table(handwrite->engine,IBUS_HANDWRITE_RECOG_TABLE_FROM_FILENAME,tablefile);
-	//UI_buildui(handwrite);
+	G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA;
+	G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA;
+	//先注册2个引擎
+
+	handwrite->engine_type = G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA ;
+	handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
 }
 
 static void ibus_handwrite_engine_destroy(IBusHandwriteEngine *handwrite)
@@ -98,6 +110,7 @@ static void ibus_handwrite_engine_destroy(IBusHandwriteEngine *handwrite)
 
 static void ibus_handwrite_engine_enable(IBusHandwriteEngine *engine)
 {
+
 	UI_buildui(engine);
 }
 
@@ -114,6 +127,21 @@ static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
 
 static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 {
+	extern char iconfile[4096];
+
+	g_debug("icon file is %s",iconfile);
+
+	IBusPropList * pl = ibus_prop_list_new();
+
+	IBusProperty * p = ibus_property_new("choose-engine", PROP_TYPE_NORMAL,
+			ibus_text_new_from_static_string(_("engine")), iconfile,
+			ibus_text_new_from_static_string(_("click to set engine")), TRUE, TRUE,
+			PROP_STATE_UNCHECKED, NULL);
+
+	ibus_prop_list_append(pl, p);
+
+	ibus_engine_register_properties(IBUS_ENGINE(engine), pl);
+
 	UI_show_ui(engine);
 }
 
@@ -123,10 +151,30 @@ static void ibus_handwrite_engine_focus_out(IBusHandwriteEngine *engine)
 	printf("%s \n", __func__);
 
 }
+
 static void ibus_handwrite_engine_reset(IBusHandwriteEngine *engine)
 {
 	printf("%s \n", __func__);
 //	ibus_handwrite_engine_disable(engine);
+}
+
+void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name, guint prop_state)
+{
+	IBusHandwriteEngine *  handwrite = IBUS_HANDWRITE_ENGINE(engine);
+
+	if(g_strcmp0(prop_name,"choose-engine")==0)
+	{
+		g_debug("change engine");
+
+		g_object_unref(handwrite->engine);
+
+		if (handwrite->engine_type == G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA)
+			handwrite->engine_type = G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA;
+		else
+			handwrite->engine_type = G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA;
+
+		handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
+	}
 }
 
 static gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index)

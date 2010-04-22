@@ -25,10 +25,9 @@ test: ibus-engine-handwrite
 		--icon $(top_srcdir)/icons/ibus-handwrite.svg \
 		--table $(top_srcdir)/data/table.txt
 
-AM_CFLAGS= @GTK2_CFLAGS@ @IBUS_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\"  \
-			-DMODEFILE=\"@MODEFILE@\" -DTABLEFILE=\"$(TABLEFILE)\"
+AM_CPPFLAGS= @ALL_NEED_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\" -DTABLEFILE=\"$(TABLEFILE)\"
 
-AM_LDFLAGS = @IBUS_LIBS@ @GTK2_LIBS@
+LIBS += @ALL_NEED_LIBS@
 
 libexec_PROGRAMS = ibus-engine-handwrite
 
@@ -39,6 +38,12 @@ ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	\
 					  handrecog.h \
 					  UI.h \
 					  $(NULL)
+
+if WITH_ZINNIA
+ibus_engine_handwrite_SOURCES +=  handrecog_zinnia.c
+AM_CPPFLAGS += -DWITH_ZINNIA
+endif					  
+					  
 
 component_DATA = handwrite.xml 
 

@@ -12,7 +12,7 @@
 GType ibus_handwrite_engine_get_type(void);
 
 #define IBUS_HANDWRITE_ENGINE_GET_CLASS(obj)	((IBusHandwriteEngineClass*)(IBUS_ENGINE_GET_CLASS(obj)))
-
+#define IBUS_HANDWRITE_ENGINE(obj)				G_TYPE_CHECK_INSTANCE_CAST(obj,IBUS_TYPE_HANDWRITE_ENGINE,IBusHandwriteEngine)
 
 typedef struct _IBusHandwriteEngine IBusHandwriteEngine;
 typedef struct _IBusHandwriteEngineClass IBusHandwriteEngineClass;
@@ -20,8 +20,8 @@ typedef struct _IBusHandwriteEngineClass IBusHandwriteEngineClass;
 struct _IBusHandwriteEngine
 {
 	IBusEngine parent;
-
 	/* members */
+	GType		engine_type;
 	GtkWidget * drawpanel;
 	GdkPoint lastpoint;
 	guint mouse_state;

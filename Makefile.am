@@ -23,7 +23,6 @@
 SUBDIRS = \
 	src \
 	icons \
-	m4 \
 	po \
 	data \
 	doc \
@@ -31,7 +30,7 @@ SUBDIRS = \
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = \
+EXTRA_DIST = m4 \
 	autogen.sh \
 	@PACKAGE_NAME@.spec.in \
 	debian \

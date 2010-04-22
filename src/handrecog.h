@@ -43,24 +43,21 @@ struct _IbusHandwriteRecogClass{
     void (* destroy)        (IbusHandwriteRecog*object);
 
     /*numbers*/
-
-	/*
-	 *  if way = IBUS_HANDWRITE_RECOG_TABLE_FROM_FILE, then pass filename
-	 *  if way = IBUS_HANDWRITE_RECOG_TABLE_FROM_MEMORY, then pass start point and length
-	 *  if way = IBUS_HANDWRITE_RECOG_TABLE_FROM_FD, then pass file descriptor
-	 *
-	 *  return 0 at success
-	 *  return -1 at failed
-	 *  return 1 , IbusHandwriteRecog will try another way, ie, wrapper
-	 */
-	int (*load_table)(IbusHandwriteRecog*, int way, ...);
 	void (*change_stroke)(IbusHandwriteRecog*);
 	gboolean (*domatch)(IbusHandwriteRecog*,int want);
 };
 
 GType ibus_handwrite_recog_get_type(void) G_GNUC_CONST;
+GType ibus_handwrite_recog_lucykila_get_type(void) G_GNUC_CONST;
 GType ibus_handwrite_recog_zinnia_get_type(void) G_GNUC_CONST;
 
+#ifdef WITH_ZINNIA
+#define G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA (ibus_handwrite_recog_zinnia_get_type())
+#else
+#define G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA
+#endif
+
+#define G_TYPE_IBUS_HANDWRITE_RECOG_LUCYKILA (ibus_handwrite_recog_lucykila_get_type())
 #define G_TYPE_IBUS_HANDWRITE_RECOG (ibus_handwrite_recog_get_type())
 #define IBUS_HANDWRITE_RECOG_GET_CLASS(obj) G_TYPE_INSTANCE_GET_CLASS ((obj), G_TYPE_IBUS_HANDWRITE_RECOG, IbusHandwriteRecogClass)
 #define IBUS_HANDWRITE_RECOG(obj) \
@@ -72,14 +69,8 @@ enum{
 	IBUS_HANDWRITE_RECOG_TABLE_FROM_MEMORY
 };
 
-typedef enum{
-	IBUS_HANDWRITE_RECOG_ENGINE_ZINNIA,
-	IBUS_HANDWRITE_RECOG_ENGINE_LUCYKILA
-}ENGINEYTPE;
 
-
-
-IbusHandwriteRecog* ibus_handwrite_recog_new( ENGINEYTPE   engine );
+IbusHandwriteRecog* ibus_handwrite_recog_new( GType   engine );
 
 /*
  *  if way = IBUS_HANDWRITE_RECOG_TABLE_FROM_FILE, then pass filename
@@ -87,7 +78,6 @@ IbusHandwriteRecog* ibus_handwrite_recog_new( ENGINEYTPE   engine );
  *  if way = IBUS_HANDWRITE_RECOG_TABLE_FROM_FD, then pass file descriptor
  */
 
-int ibus_handwrite_recog_load_table(IbusHandwriteRecog*, int way, ...);
 void ibus_handwrite_recog_clear_stroke(IbusHandwriteRecog*obj);
 void ibus_handwrite_recog_append_stroke(IbusHandwriteRecog*obj,LineStroke stroke);
 void ibus_handwrite_recog_remove_stroke(IbusHandwriteRecog*obj,int number);

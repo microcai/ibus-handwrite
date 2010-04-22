@@ -75,64 +75,9 @@ gboolean ibus_handwrite_recog_domatch(IbusHandwriteRecog*obj,int want)
 	return IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->domatch(obj,want);
 }
 
-gboolean ibus_handwrite_recog_load_table(IbusHandwriteRecog* obj, int way, ...)
+IbusHandwriteRecog* ibus_handwrite_recog_new(GType enginetype)
 {
-	va_list ap;
-	int fd = -1;
-	FILE * file = NULL;
-	gchar * filename = NULL;
-	void * start_ptr = NULL;
-	int len = -1;
-	int child_ret  ;
-
-	va_start(ap,way);
-	switch(way){
-	case IBUS_HANDWRITE_RECOG_TABLE_FROM_FILENAME:
-		filename = va_arg(ap,gchar*);
-		if ((child_ret = IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->load_table(obj,
-				way, filename)) != 1)
-			break;
-		file = fopen(filename,"r");
-		if(!file)
-			return FALSE;
-	case IBUS_HANDWRITE_RECOG_TABLE_FROM_FILE:
-		if(!file) file = va_arg(ap,FILE*);
-		if ((child_ret = IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->load_table(obj,
-				way, file)) != 1)
-			break;
-
-		va_start(ap,way);
-		if (file != va_arg(ap,FILE*))
-		{
-			fclose(file);
-			file = NULL;
-			fd = open(filename,O_WRONLY);
-		}else
-		{
-			fd = fileno(file);
-		}
-	case IBUS_HANDWRITE_RECOG_TABLE_FROM_FD:
-		if(fd ==-1)	fd = va_arg(ap,int);
-
-		if ((child_ret = IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->load_table(obj,
-				way, fd)) != 1)
-			break;
-		return -1;
-	case IBUS_HANDWRITE_RECOG_TABLE_FROM_MEMORY:
-		start_ptr = va_arg(ap,void*);
-		len = va_arg(ap,int);
-		return IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->load_table(obj,way,start_ptr,len);
-
-	}
-	return child_ret == 0;
-}
-
-IbusHandwriteRecog* ibus_handwrite_recog_new(ENGINEYTPE enginetype)
-{
-	GType engine[] =
-	{ 0 , ibus_handwrite_recog_lucykila_get_type() };
-
-	return IBUS_HANDWRITE_RECOG(g_type_create_instance(engine[enginetype]));
+	return IBUS_HANDWRITE_RECOG(g_object_new(enginetype,NULL));
 }
 
 
@@ -195,7 +140,6 @@ static void ibus_handwrite_recog_class_init(IbusHandwriteRecogClass* klass)
 
 	gobject_class->dispose = my_dispose ;
 
-	klass->load_table = NULL;
 	klass->change_stroke = NULL;
 	klass->domatch = NULL;
 	klass->destroy = ibus_handwrite_recog_destory ;

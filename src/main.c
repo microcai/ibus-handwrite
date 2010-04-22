@@ -23,6 +23,8 @@ static void ibus_disconnected_cb(IBusBus *bus, gpointer user_data)
 }
 
 char *tablefile=  TABLEFILE ;
+char iconfile[4096] =
+{ 0 };
 
 static void init_inside()
 {
@@ -85,8 +87,7 @@ int main(int argc, char* argv[])
 
 	gboolean have_ibus=FALSE;
 
-	gchar * icon_file = "icons/ibus-handwrite.svg";
-
+	const gchar * icon_file = "icons/ibus-handwrite.svg";
 
 	setlocale(LC_ALL, "");
 	gtk_set_locale();
@@ -114,8 +115,7 @@ int main(int argc, char* argv[])
 	{
 		char exefile[4096] =
 		{ 0 };
-		char iconfile[4096] =
-		{ 0 };
+
 		init_outside(realpath(icon_file, iconfile), realpath(argv[0], exefile));
 		printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
 	}

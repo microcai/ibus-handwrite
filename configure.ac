@@ -30,26 +30,55 @@ m4_define(ibus_maybe_datestamp,
 
 m4_define([ibus_version],
     ibus_major_version.ibus_minor_version.ibus_micro_version[]ibus_maybe_datestamp)
-
+    
+AC_PREREQ([2.63])
 AC_INIT([package_name], [ibus_version], [http://code.google.com/p/ibus/issues/entry], [package_name])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([-Wall])
 AC_GNU_SOURCE
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # define PACKAGE_VERSION_* variables
-AS_VERSION
-AS_NANO
-AM_SANITY_CHECK
-AM_MAINTAINER_MODE
 AC_PROG_CC
 AC_ISC_POSIX
 AC_HEADER_STDC
+
 PKG_PROG_PKG_CONFIG
 
 AC_ARG_WITH(debian,[AC_HELP_STRING([--with-debian],[enable debian specific build])],[],[])
-				
+
+AC_ARG_ENABLE(zinnia,AC_HELP_STRING([--enable-zinnia],[build with zinnia engine]),[],[enable_zinnia=yes])
+AC_ARG_WITH(zinnia-tomoe,[AC_HELP_STRING([--with-zinnia-tomoe=[[dir]]],[specify the dir that hold zinnia-tomoe data file])],
+	[
+		tomoedir=${withval}
+		AC_DEFINE_UNQUOTED(TOMOE_DATA_DIR,"${tomoedir}",[the dir that hold zinnia-tomoe data file])
+	],[
+			AS_IF([test "x${enable_zinnia}" = "xyes"],
+			[AC_MSG_WARN(zinnia engine disabled duto the missing --with-zinnia-tomoe)])	
+			enable_zinnia=no
+])
+
+
+# define GETTEXT_* variables
+GETTEXT_PACKAGE="$PACKAGE_NAME"
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Define to the read-only architecture-independent data directory.])
+
+AS_IF([test "x${enable_zinnia}" = "xyes"],
+	[
+		AC_CHECK_LIB(zinnia,[zinnia_recognizer_open],[],[have_zinnia=no])
+		AC_CHECK_LIB(zinnia,[zinnia_recognizer_open],[have_zinnia=yes],[have_zinnia=no])
+	],
+	[have_zinnia=no]
+)
+
+AS_IF([test "x${have_zinnia}" = "xyes" ],[
+		AM_CONDITIONAL(WITH_ZINNIA,[true])
+	],[
+		AM_CONDITIONAL(WITH_ZINNIA,[false])		
+])
+
 # check ibus
 PKG_CHECK_MODULES(IBUS, [
     ibus-1.0 >= 1.2
@@ -58,23 +87,10 @@ PKG_CHECK_MODULES(IBUS, [
 PKG_CHECK_MODULES(GTK2, [
     gtk+-2.0 >= 2.10
 ])
-# define GETTEXT_* variables
-GETTEXT_PACKAGE="$PACKAGE_NAME"
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Define to the read-only architecture-independent data directory.])
 
-AC_CHECK_FILE([/usr/share/tegaki/models/zinnia/handwriting-zh_CN.model],[
-		 have_tomoe="yes"
-		 
-		 AC_SUBST([MODEFILE],["/usr/share/tegaki/models/zinnia/handwriting-zh_CN.model"])
-		 AC_SUBST([TEST_MODEFILE],["/usr/share/tegaki/models/zinnia/handwriting-zh_CN.model"])
-		 ]
-		 ,[
-		 AC_SUBST([MODEFILE],['$(pkgdatadir)/data/handwriting-zh_CN.model'])
-		 AC_SUBST([TEST_MODEFILE],['$(top_srcdir)/data/handwriting-zh_CN.model'])
-		 ])
-
-AM_CONDITIONAL(HAVE_TOMOE,[test "x$have_tomoe"="xyes"])
+PKG_CHECK_MODULES(ALL_NEED, [
+    ibus-1.0 >= 1.2 gtk+-2.0 >= 2.10
+])
 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION(0.16.1)
@@ -87,7 +103,6 @@ ibus-handwrite.spec
 src/Makefile
 src/handwrite.xml.in
 icons/Makefile
-m4/Makefile
 data/Makefile
 doc/Makefile
 )
