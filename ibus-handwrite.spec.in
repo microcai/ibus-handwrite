@@ -12,9 +12,9 @@ Source0:    http://ibus-handwrite.googlecode.com/files/%{name}-%{version}.tar.gz
 Source1:    handwriting-zh_CN.model
 
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  gettext ibus-devel gtk2-devel
+BuildRequires:  gettext ibus-devel gtk2-devel zinnia-devel @zinnia_tomoe@
 
-Requires:   ibus gtk2
+Requires:   ibus gtk2 @zinnia_tomoe@ @zinnia@
 
 %description
 IBus handwrite project.
@@ -24,7 +24,7 @@ IBus handwrite project.
 cp %{SOURCE1} data/
 
 %build
-%configure --disable-static
+%configure --disable-static --enable-zinnia @rpm_sepc_with_tomoe@
 # make -C po update-gmo
 make %{?_smp_mflags}
 

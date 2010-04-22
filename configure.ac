@@ -49,14 +49,24 @@ PKG_PROG_PKG_CONFIG
 AC_ARG_WITH(debian,[AC_HELP_STRING([--with-debian],[enable debian specific build])],[],[])
 
 AC_ARG_ENABLE(zinnia,AC_HELP_STRING([--enable-zinnia],[build with zinnia engine]),[],[enable_zinnia=yes])
+
+AC_SUBST(rpm_sepc_with_tomoe,"")
+AC_SUBST(zinnia_tomoe,"")
+AC_SUBST(zinnia,"")
+
 AC_ARG_WITH(zinnia-tomoe,[AC_HELP_STRING([--with-zinnia-tomoe=[[dir]]],[specify the dir that hold zinnia-tomoe data file])],
 	[
 		tomoedir=${withval}
+		
+		rpm_sepc_with_tomoe="--with-zinnia-tomoe=${withval}"		
+		zinnia_tomoe="zinnia-tomoe"	
+		zinnia="zinnia"
+		
 		AC_DEFINE_UNQUOTED(TOMOE_DATA_DIR,"${tomoedir}",[the dir that hold zinnia-tomoe data file])
 	],[
 			AS_IF([test "x${enable_zinnia}" = "xyes"],
 			[AC_MSG_WARN(zinnia engine disabled duto the missing --with-zinnia-tomoe)])	
-			enable_zinnia=no
+			enable_zinnia=no;
 ])
 
 
