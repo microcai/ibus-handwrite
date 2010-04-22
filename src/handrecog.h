@@ -58,8 +58,8 @@ struct _IbusHandwriteRecogClass{
 	gboolean (*domatch)(IbusHandwriteRecog*,int want);
 };
 
-GType ibus_handwrite_recog_get_type(void);
-GType ibus_handwrite_recog_zinnia_get_type(void);
+GType ibus_handwrite_recog_get_type(void) G_GNUC_CONST;
+GType ibus_handwrite_recog_zinnia_get_type(void) G_GNUC_CONST;
 
 #define G_TYPE_IBUS_HANDWRITE_RECOG (ibus_handwrite_recog_get_type())
 #define IBUS_HANDWRITE_RECOG_GET_CLASS(obj) G_TYPE_INSTANCE_GET_CLASS ((obj), G_TYPE_IBUS_HANDWRITE_RECOG, IbusHandwriteRecogClass)
