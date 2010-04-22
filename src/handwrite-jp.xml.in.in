@@ -1,5 +1,5 @@
 <?xml version=\"1.0\" encoding=\"utf-8\"?>
-<!-- filename: enchant.xml -->
+<!-- filename: handwrite-jp.xml -->
 <component>
 	<name>org.freedesktop.IBus.handwrite</name>
 	<description>HandWrite Component</description>

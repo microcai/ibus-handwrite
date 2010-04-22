@@ -1,5 +1,5 @@
 /*
- * caicai_recg.c - caicai recognize engine
+ * handrecog.c - Handwrite recognize engine
  *
  *  Created on: 2010-2-2
  *      Author: cai

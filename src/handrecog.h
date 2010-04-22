@@ -1,5 +1,5 @@
 /*
- * handrecog.c
+ * handrecog.h
  *
  *  Created on: 2010-2-4
  *      Author: cai
