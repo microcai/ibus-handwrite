@@ -61,7 +61,8 @@ componentdir = @datadir@/ibus/component
 EXTRA_DIST = handwrite-zh.xml.in handwrite-jp.xml.in
 
 CLEANFILES = \
-	handwrite.xml \
+	handwrite-zh.xml \
+	handwrite-jp.xml \
 	$(NULL)
 
 handwrite-zh.xml: handwrite-zh.xml.in
