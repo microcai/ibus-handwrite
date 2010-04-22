@@ -35,13 +35,8 @@ struct _IbusHandwriteRecog{
 
 struct _IbusHandwriteRecogClass{
 	GObjectClass parent;
-
-	void (*dispose)(GObject*);
-	guint singal[2];
-
 	/* signals */
     void (* destroy)        (GObject*object);
-
     /*numbers*/
 	void (*change_stroke)(IbusHandwriteRecog*);
 	gboolean (*domatch)(IbusHandwriteRecog*,int want);

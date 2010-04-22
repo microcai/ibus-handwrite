@@ -142,7 +142,6 @@ static void ibus_handwrite_recog_zinnia_class_init(IbusHandwriteRecogZinniaClass
 	IbusHandwriteRecogClass * parent = (IbusHandwriteRecogClass*)(klass);
 	klass->parentdestroy = G_OBJECT_CLASS(klass)->finalize;
 
-	parent->destroy = ibus_handwrite_recog_zinnia_destory;
 	parent->domatch =ibus_handwrite_recog_zinnia_domatch;
 
 	G_OBJECT_CLASS(klass)->finalize = ibus_handwrite_recog_zinnia_destory;
