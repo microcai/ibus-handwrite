@@ -19,7 +19,7 @@ static IBusFactory *factory = NULL;
 
 char *tablefile=  TABLEFILE ;
 char icondir[4096]= PKGDATADIR"/icons";
-char lang[20]	= "zh_CH";
+char lang[20]	= "zh_CN";
 
 int main(int argc, char* argv[])
 {
@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
 	const gchar * language="zh";
 
-	const gchar * icon_dir = "icons/ibus-handwrite.svg";
+	const gchar * icon_dir = NULL;
 
 	setlocale(LC_ALL, "");
 	gtk_set_locale();
@@ -72,7 +72,9 @@ int main(int argc, char* argv[])
 #endif
 
 	ibus_init();
-	realpath(icon_dir, icondir);
+
+	if(icon_dir)
+		realpath(icon_dir, icondir);
 
 	bus = ibus_bus_new();
 
