@@ -71,6 +71,10 @@ int main(int argc, char* argv[])
 
 #endif
 
+	gchar * engine_name = g_strdup_printf("handwrite-%s",lang);
+
+	gchar * dbus_name = g_strdup_printf("org.freedesktop.IBus.handwrite-%s",lang);
+
 	ibus_init();
 
 	if(icon_dir)
@@ -82,11 +86,10 @@ int main(int argc, char* argv[])
 
 	factory = ibus_factory_new(ibus_bus_get_connection(bus));
 
-	gchar * dbus_name = g_strdup_printf("org.freedesktop.IBus.handwrite-%s",lang);
 
 	ibus_bus_request_name(bus, dbus_name, 0);
 
-	g_free(dbus_name);
+//	g_free(dbus_name);
 
 	if (!have_ibus)
 	{
@@ -94,13 +97,13 @@ int main(int argc, char* argv[])
 
 		exefile = realpath(argv[0],NULL);
 
-		component = ibus_component_new("org.freedesktop.IBus.handwrite",
+		component = ibus_component_new(dbus_name,
 				"handwrite", PACKAGE_VERSION, "GPL", MICROCAI_WITHEMAIL, PACKAGE_BUGREPORT,
 				exefile, GETTEXT_PACKAGE);
 
 		gchar * iconfile =  g_strdup_printf("%s/ibus-handwrite.svg",icondir);
 
-		desc = ibus_engine_desc_new("handwrite", "handwrite",
+		desc = ibus_engine_desc_new(engine_name, "handwrite",
 				_("hand write recognizer"), lang, "GPL",
 				MICROCAI_WITHEMAIL, iconfile, "us");
 
@@ -111,14 +114,20 @@ int main(int argc, char* argv[])
 
 	}else
 	{
-		component = ibus_component_new("org.freedesktop.IBus.handwrite",
+		component = ibus_component_new(dbus_name,
 				"handwrite", PACKAGE_VERSION, "GPL", MICROCAI_WITHEMAIL, PACKAGE_BUGREPORT,
 				PKGDATADIR, GETTEXT_PACKAGE);
 	}
 
+	g_free(dbus_name);
+
+
 	ibus_bus_register_component(bus, component);
 
-	ibus_factory_add_engine(factory, "handwrite", IBUS_TYPE_HANDWRITE_ENGINE);
+
+	ibus_factory_add_engine(factory, engine_name, IBUS_TYPE_HANDWRITE_ENGINE);
+
+	g_free(engine_name);
 
 	g_object_unref(component);
 
