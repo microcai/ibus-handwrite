@@ -1,7 +1,7 @@
 <?xml version=\"1.0\" encoding=\"utf-8\"?>
 <!-- filename: handwrite-zh.xml -->
 <component>
-	<name>org.freedesktop.IBus.handwrite</name>
+	<name>org.freedesktop.IBus.handwrite-zh_CN</name>
 	<description>HandWrite Component</description>
 	<exec>${libexecdir}/ibus-engine-handwrite --ibus</exec>
 	<version>@VERSION@</version>

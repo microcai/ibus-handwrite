@@ -82,8 +82,11 @@ int main(int argc, char* argv[])
 
 	factory = ibus_factory_new(ibus_bus_get_connection(bus));
 
-	ibus_bus_request_name(bus, "org.freedesktop.IBus.handwrite", 0);
+	gchar * dbus_name = g_strdup_printf("org.freedesktop.IBus.handwrite-%s",lang);
 
+	ibus_bus_request_name(bus, dbus_name, 0);
+
+	g_free(dbus_name);
 
 	if (!have_ibus)
 	{

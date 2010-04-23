@@ -1,7 +1,7 @@
 <?xml version=\"1.0\" encoding=\"utf-8\"?>
 <!-- filename: handwrite-jp.xml -->
 <component>
-	<name>org.freedesktop.IBus.handwrite</name>
+	<name>org.freedesktop.IBus.handwrite-ja</name>
 	<description>HandWrite Component</description>
 	<exec>${libexecdir}/ibus-engine-handwrite --ibus --lang=jp</exec>
 	<version>@VERSION@</version>
