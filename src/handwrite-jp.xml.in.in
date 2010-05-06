@@ -12,14 +12,14 @@
 
 	<engines>
 		<engine>
-			<name>handwrite</name>
+			<name>handwrite-ja</name>
 			<language>ja</language>
 			<license>GPL</license>
 			<author>Microcai &lt;microcai AT fedoraproject DOT org &gt;</author>
 			<icon>${pkgdatadir}/icons/ibus-handwrite.svg</icon>
 			<layout>us</layout>
 			<longname>handwrite</longname>
-			<description>Handwrite手写输入系统</description>
+			<description>Handwrite手書き入力システム</description>
 			<rank>0</rank>
 		</engine>
 	</engines>

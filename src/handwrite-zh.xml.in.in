@@ -12,7 +12,7 @@
 
 	<engines>
 		<engine>
-			<name>handwrite</name>
+			<name>handwrite-zh</name>
 			<language>zh_CN</language>
 			<license>GPL</license>
 			<author>Microcai &lt;microcai AT fedoraproject DOT org &gt;</author>
