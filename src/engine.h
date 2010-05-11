@@ -25,6 +25,7 @@ struct _IBusHandwriteEngine
 	GtkWidget * drawpanel;
 	GtkWidget * lookuppanel;
 	GdkPoint lastpoint;
+	GdkColor color[1]; // color used by pen
 	guint mouse_state;
 	IbusHandwriteRecog * engine;
 	LineStroke currentstroke;

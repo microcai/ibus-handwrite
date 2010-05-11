@@ -34,18 +34,19 @@ int main(int argc, char* argv[])
 
 	const gchar * icon_dir = NULL;
 
+	const gchar * locale_dir = NULL;
+
+
 	setlocale(LC_ALL, "");
 	gtk_set_locale();
 	textdomain(GETTEXT_PACKAGE);
-#ifdef DEBUG
-	bindtextdomain(GETTEXT_PACKAGE, "/tmp/usr/share/locale");
-#endif
 
 	GOptionEntry args[] =
 	{
 			{"ibus",'\0',0,G_OPTION_ARG_NONE,&have_ibus},
 			{"icondir",'\0',0,G_OPTION_ARG_STRING,&icon_dir,_("the icon file"),N_("icon file")},
 			{"table",'\0',0,G_OPTION_ARG_STRING,&tablefile,_("set table file path"),N_("tablefile")},
+			{"locale",'\0',0,G_OPTION_ARG_STRING,&locale_dir,_("set locale path"),N_("locale")},
 #ifdef WITH_ZINNIA
 			{"lang",'\0',0,G_OPTION_ARG_STRING,&language,_("set languate, accept zh and jp"),N_("lang")},
 #endif
@@ -70,6 +71,11 @@ int main(int argc, char* argv[])
 	}
 
 #endif
+
+	if(locale_dir)
+	{
+		bindtextdomain(GETTEXT_PACKAGE,locale_dir);
+	}
 
 	gchar * engine_name = g_strdup_printf("handwrite-%s",lang);
 

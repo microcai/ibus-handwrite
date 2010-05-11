@@ -136,29 +136,34 @@ static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 {
 	UI_show_ui(engine);
 
-#ifdef WITH_ZINNIA
-	if( strcmp(lang,"jp") ==0 || strcmp(lang,"ja")==0 )
-	{
-		return ;
-	}
-#endif
-
-	extern char icondir[4096];
-
-	gchar * iconfile = g_strdup_printf("%s/switch.svg",icondir);
-
-	g_debug("icon file is %s",iconfile);
-
 	IBusPropList * pl = ibus_prop_list_new();
 
-	IBusProperty * p = ibus_property_new("choose-engine", PROP_TYPE_NORMAL,
-			ibus_text_new_from_static_string(_("engine")), iconfile,
-			ibus_text_new_from_static_string(_("click to set engine")), TRUE, TRUE,
+	IBusProperty * p = ibus_property_new("choose-color", PROP_TYPE_NORMAL,
+			ibus_text_new_from_static_string(_("color")), GTK_STOCK_COLOR_PICKER,
+			ibus_text_new_from_static_string(_("click to set color")), TRUE, TRUE,
 			PROP_STATE_UNCHECKED, NULL);
 
-	g_free(iconfile);
-
 	ibus_prop_list_append(pl, p);
+
+#ifdef WITH_ZINNIA
+	if( strcmp(lang,"jp") ==0 || strcmp(lang,"ja"))
+	{
+		extern char icondir[4096];
+
+		gchar * iconfile = g_strdup_printf("%s/switch.svg",icondir);
+
+		g_debug("icon file is %s",iconfile);
+
+		p = ibus_property_new("choose-engine", PROP_TYPE_NORMAL,
+				ibus_text_new_from_static_string(_("engine")), iconfile,
+				ibus_text_new_from_static_string(_("click to set engine")), TRUE, TRUE,
+				PROP_STATE_UNCHECKED, NULL);
+
+		g_free(iconfile);
+
+		ibus_prop_list_append(pl, p);
+	}
+#endif
 
 	ibus_engine_register_properties(IBUS_ENGINE(engine), pl);
 
@@ -193,6 +198,20 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 			handwrite->engine_type = G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA;
 
 		handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
+
+	}else if(g_strcmp0(prop_name,"choose-color")==0)
+	{
+		g_debug("color choose");
+
+		GtkWidget * dialog = gtk_color_selection_dialog_new(prop_name);
+
+		gtk_dialog_run(GTK_DIALOG(dialog));
+
+		GtkWidget * color_sel = gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(dialog));
+
+		gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(color_sel),handwrite->color);
+
+		gtk_widget_destroy(dialog);
 	}
 }
 

@@ -23,12 +23,14 @@ TABLEFILE = $(pkgdatadir)/data/table.txt
 test: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
 		--icondir $(top_srcdir)/icons/ \
-		--table $(top_srcdir)/data/table.txt
+		--table $(top_srcdir)/data/table.txt \
+		--locale /tmp/${prefix}/share/locale/ 
 if WITH_ZINNIA		
 test-jp: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
 		--icondir $(top_srcdir)/icons/ \
 		--table $(top_srcdir)/data/table.txt \
+		--locale /tmp/${prefix}/share/locale/ \
 		--lang=jp
 endif		
 AM_CPPFLAGS= @ALL_NEED_CFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\" -DTABLEFILE=\"$(TABLEFILE)\"

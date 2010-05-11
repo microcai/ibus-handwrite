@@ -35,6 +35,18 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 
 	//已经录入的笔画
 
+	gdk_gc_set_line_attributes(gc,3,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
+
+//	GdkColor color[1];
+
+	engine->color;
+
+//	gdk_color_parse("green",color);
+
+	gdk_colormap_alloc_color(widget->style->colormap,engine->color,FALSE,TRUE);
+
+	gdk_gc_set_foreground(gc,engine->color);
+
 	for (i = 0; i < engine->engine->strokes->len ; i++ )
 	{
 		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
@@ -46,6 +58,7 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 		gdk_draw_lines(window, gc, engine->currentstroke.points,
 				engine->currentstroke.segments);
 
+	gdk_colormap_free_colors(widget->style->colormap,engine->color,1);
 	g_object_unref(gc);
 	return TRUE;
 }
