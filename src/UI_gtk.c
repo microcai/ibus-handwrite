@@ -46,6 +46,7 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 		gdk_draw_lines(window, gc, engine->currentstroke.points,
 				engine->currentstroke.segments);
 
+	g_object_unref(gc);
 	return TRUE;
 }
 
@@ -212,6 +213,7 @@ void UI_buildui(IBusHandwriteEngine * engine)
 		g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
 		g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
 	}
+	gtk_widget_show_all(engine->drawpanel);
 }
 
 void UI_show_ui(IBusHandwriteEngine * engine)

@@ -37,6 +37,7 @@ void ibus_handwrite_recog_clear_stroke(IbusHandwriteRecog*obj)
 
 	if (IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke)
 		IBUS_HANDWRITE_RECOG_GET_CLASS(obj)->change_stroke(obj);
+
 }
 
 void ibus_handwrite_recog_append_stroke(IbusHandwriteRecog*obj,LineStroke stroke)

@@ -221,14 +221,13 @@ static gboolean ibus_handwrite_engine_process_key_event(IBusEngine *engine,
 {
 	IBusHandwriteEngine *handwrite = (IBusHandwriteEngine *) engine;
 
+	gtk_widget_queue_draw(handwrite->drawpanel);
+
 	if (!modifiers)
 		return FALSE;
 
 	if(!handwrite->engine->strokes->len )
 		return FALSE;
-
-
-	gdk_window_invalidate_rect(handwrite->drawpanel->window,0,0);
 
 	switch (keyval)
 	{
@@ -246,10 +245,13 @@ static gboolean ibus_handwrite_engine_process_key_event(IBusEngine *engine,
 		return ibus_handwrite_engine_commit_text(handwrite,0);
 
 	case IBUS_0 ... IBUS_9:
-
 	case IBUS_KP_0 ... IBUS_KP_9:
 		return ibus_handwrite_engine_commit_text(handwrite,
 				(keyval > IBUS_KP_0) ? (keyval - IBUS_KP_0) : (keyval - IBUS_0));
+
+	case IBUS_Escape:
+		ibus_handwrite_recog_clear_stroke(handwrite->engine);
+		return TRUE;
 	}
 	return FALSE;
 }
