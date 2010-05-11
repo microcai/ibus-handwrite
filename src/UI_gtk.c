@@ -10,25 +10,26 @@
 #include "engine.h"
 #include "UI.h"
 
-static gboolean paint_ui(GtkWidget *widget, GdkEventExpose *event,
-		gpointer user_data)
+static void widget_realize(GtkWidget *widget, gpointer user_data);
+
+static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
 {
 	GdkGC *gc;
+	GdkWindow * window;
 
-	IBusHandwriteEngine * engine;
 
 	LineStroke cl;
 	int i;
 
 	MatchedChar * matched;
 
-	engine = (IBusHandwriteEngine *) (user_data);
+	window = widget->window;
 
-	gc = gdk_gc_new(widget->window);
+	gc = gdk_gc_new(window);
 
-	gdk_draw_rectangle(widget->window, gc,0,0,0,199,199);
+	gdk_draw_rectangle(window, gc,0,0,0,199,199);
 
-	gdk_draw_rectangle(widget->window, gc,0,200,0,399,199);
+	gdk_draw_rectangle(window, gc,0,200,0,399,199);
 
 	puts(__func__);
 
@@ -38,32 +39,50 @@ static gboolean paint_ui(GtkWidget *widget, GdkEventExpose *event,
 	{
 		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
 		cl =  g_array_index(engine->engine->strokes,LineStroke,i);
-		gdk_draw_lines(widget->window, gc, cl.points,cl.segments );
+		gdk_draw_lines(window, gc, cl.points,cl.segments );
 	}
 	//当下笔画
 	if ( engine->currentstroke.segments && engine->currentstroke.points )
-		gdk_draw_lines(widget->window, gc, engine->currentstroke.points,
+		gdk_draw_lines(window, gc, engine->currentstroke.points,
 				engine->currentstroke.segments);
 
+	return TRUE;
+}
+
+static void regen_loopuptable(GtkWidget * widget, IBusHandwriteEngine * engine)
+{
+	int i;
+	MatchedChar *matched;
+	char drawtext[32]={0};
+	GtkWidget * bt;
+
+	gtk_container_foreach(GTK_CONTAINER(widget),(GtkCallback)gtk_widget_destroy,0);
 
 	int munber = ibus_handwrite_recog_getmatch(engine->engine,&matched,0);
 
 	//画10个侯选字
-	for (i = 0; i < munber ; ++i)
+	for (i = 0; i < MIN(munber,10) ; ++i)
 	{
-
-		char drawtext[32]={0};
-
 		sprintf(drawtext,"%d.%s",i,matched[i].chr);
 
-		PangoLayout * layout = gtk_widget_create_pango_layout(widget,drawtext);
+		bt = gtk_button_new_with_label(drawtext);
 
-		gdk_draw_layout(widget->window, gc, (i % 5) * 40 + 3, 205 + (20 * (i / 5)),	layout);
-		g_object_unref(layout);
+		gtk_table_attach_defaults(GTK_TABLE(widget),bt,i%5,i%5+1,i/5,i/5+1);
+
+		gtk_widget_show(bt);
+
+		void clicked(GtkButton *button, IBusHandwriteEngine *engine)
+		{
+			ibus_handwrite_engine_commit_text(engine,GPOINTER_TO_INT(g_object_get_data(G_OBJECT(button),"order")));
+		}
+
+		g_object_set_data(G_OBJECT(bt),"order",GINT_TO_POINTER(i));
+		g_signal_connect(bt,"clicked",G_CALLBACK(clicked),engine);
+
+		gtk_widget_show(bt);
 	}
 
-	g_object_unref(gc);
-	return TRUE;
+//	g_array_free(matched,TRUE);
 }
 
 
@@ -80,37 +99,28 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 
 	if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
 		ct = GDK_FLEUR;
-//	ct = GDK_FLEUR;
-
-	GdkCursor * cursor = gdk_cursor_new(ct);// event->y <200 ?  GDK_PENCIL:GDK_HAND2);
-
-	gdk_window_set_cursor(widget->window, cursor);
-
-	gdk_cursor_unref(cursor);
 
 	if (engine->mouse_state == GDK_BUTTON_PRESS) // 鼠标按下状态
 	{
-		if ((event->x > 0) && (event->y > 0) && (event->x < 199) && (event->y
-				< 199))
-		{
 
+		engine->currentstroke.points
+				= g_renew(GdkPoint,engine->currentstroke.points,engine->currentstroke.segments +1  );
 
-			engine->currentstroke.points
-					= g_renew(GdkPoint,engine->currentstroke.points,engine->currentstroke.segments +1  );
+		engine->currentstroke.points[engine->currentstroke.segments].x
+				= event->x;
+		engine->currentstroke.points[engine->currentstroke.segments].y
+				= event->y;
+		engine->currentstroke.segments++;
+		printf("move, x= %lf, Y=%lf, segments = %d \n",event->x,event->y,engine->currentstroke.segments);
 
-			engine->currentstroke.points[engine->currentstroke.segments].x
-					= event->x;
-			engine->currentstroke.points[engine->currentstroke.segments].y
-					= event->y;
-			engine->currentstroke.segments++;
-			printf("move, x= %lf, Y=%lf, segments = %d \n",event->x,event->y,engine->currentstroke.segments);
-		}
-		gdk_window_invalidate_rect(widget->window, 0, TRUE);
+		gtk_widget_queue_draw(widget);
+//		gtk_widget_queue_draw(engine->drawpanel);
+
 	}
 	else if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
 	{
 //	printf("move start, x = %lf y = %lf \n",event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
-		gtk_window_move(GTK_WINDOW(widget),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
+		gtk_window_move(GTK_WINDOW(engine->drawpanel),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
 	}
 
 	return FALSE;
@@ -136,41 +146,37 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 		}
 
 		engine->mouse_state = GDK_BUTTON_PRESS;
-		if ((event->x > 0) && (event->y > 0) && (event->x < 199) && (event->y
-				< 199))
-		{
 
-			g_print("mouse clicked\n");
+		g_print("mouse clicked\n");
 
-			engine->currentstroke.segments = 1;
+		engine->currentstroke.segments = 1;
 
-			engine->currentstroke.points = g_new(GdkPoint,1);
+		engine->currentstroke.points = g_new(GdkPoint,1);
 
-			engine->currentstroke.points[0].x = event->x;
-			engine->currentstroke.points[0].y = event->y;
+		engine->currentstroke.points[0].x = event->x;
+		engine->currentstroke.points[0].y = event->y;
 
-		}
-		else if ((event->x > 0) && (event->y > 0) && (event->x < 199))
-		{
-			int x = event->x;
-			int y = event->y;
-			//看鼠标点击的是哪个字，吼吼
 
-			for (i = 9; i >= 0; --i)
-			{
-				if (((i % 5) * 40 + 3) <= x && ((205 + (20 * (i / 5))) <= y))
-				{
-					IBUS_HANDWRITE_ENGINE_GET_CLASS(engine)->commit_text(engine, i);
-					break;
-				}
-			}
-		}
+//		else if ((event->x > 0) && (event->y > 0) && (event->x < 199))
+//		{
+//			int x = event->x;
+//			int y = event->y;
+//			//看鼠标点击的是哪个字，吼吼
+//
+//			for (i = 9; i >= 0; --i)
+//			{
+//				if (((i % 5) * 40 + 3) <= x && ((205 + (20 * (i / 5))) <= y))
+//				{
+//					IBUS_HANDWRITE_ENGINE_GET_CLASS(engine)->commit_text(engine, i);
+//					break;
+//				}
+//			}
+//		}
 		break;
 	case GDK_BUTTON_RELEASE:
 		engine->mouse_state = GDK_BUTTON_RELEASE;
 
 		ibus_handwrite_recog_append_stroke(engine->engine,engine->currentstroke);
-
 
 		engine->currentstroke.segments = 0;
 		g_free(engine->currentstroke.points);
@@ -181,7 +187,8 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 
 		g_print("mouse released\n");
 
-		gdk_window_invalidate_rect(event->window, 0, TRUE);
+		gtk_widget_queue_draw(widget);//engine->drawpanel);
+		regen_loopuptable(engine->lookuppanel,engine);
 
 		break;
 	default:
@@ -190,64 +197,39 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 	return TRUE;
 }
 
-
 void UI_buildui(IBusHandwriteEngine * engine)
 {
-	GdkPixmap * pxmp;
-	GdkGC * gc;
-	GdkColor black, white;
-
-	GdkColormap* colormap = gdk_colormap_get_system();
-
-	gdk_color_black(colormap, &black);
-	gdk_color_white(colormap, &white);
-
-	g_object_unref(colormap);
-
-	int R = 5;
 
 	if (!engine->drawpanel)
 	//建立绘图窗口, 建立空点
 	{
 		engine->drawpanel = gtk_window_new(GTK_WINDOW_POPUP);
-		gtk_window_move((GtkWindow*) engine->drawpanel, 500, 550);
-		gtk_widget_add_events(GTK_WIDGET(engine->drawpanel),
-				GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK
-						| GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK);
-		g_signal_connect_after(G_OBJECT(engine->drawpanel),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);
-		g_signal_connect(G_OBJECT(engine->drawpanel),"expose-event",G_CALLBACK(paint_ui),engine);
-		g_signal_connect(G_OBJECT(engine->drawpanel),"button-release-event",G_CALLBACK(on_button),engine);
-		g_signal_connect(G_OBJECT(engine->drawpanel),"button-press-event",G_CALLBACK(on_button),engine);
+		g_signal_connect(G_OBJECT(engine->drawpanel),"realize",G_CALLBACK(widget_realize),engine);
 
-		gtk_window_resize(GTK_WINDOW(engine->drawpanel), 200, 250);
+		GtkWidget * vbox = gtk_vbox_new(FALSE,0);
 
-		gtk_widget_show(engine->drawpanel);
+		gtk_container_add(GTK_CONTAINER(engine->drawpanel),vbox);
 
-		pxmp = gdk_pixmap_new(NULL, 200, 250, 1);
-		gc = gdk_gc_new(GDK_DRAWABLE(pxmp));
+		GtkWidget * drawing_area = gtk_drawing_area_new();
 
-		gdk_gc_set_foreground(gc, &black);
+		gtk_widget_set_size_request(drawing_area,200,200);
 
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, 200, 250);
+		gtk_box_pack_start(GTK_BOX(vbox),drawing_area,FALSE,TRUE,FALSE);
+		g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines),engine);
 
-		gdk_gc_set_foreground(gc, &white);
+		engine->lookuppanel = gtk_table_new(2,5,TRUE);
 
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, R*2, R*2, 0, 360 * 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 0, R*2, R*2, 0, 360
-				* 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 250 - R*2, R*2, R*2, 0,
-				360 * 64);
-		gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 250 - R*2, R*2, R*2, 0, 360
-				* 64);
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, 200, 250 - R*2);
-		gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, 200 - R*2, 250);
-		gdk_window_shape_combine_mask(engine->drawpanel->window, pxmp, 0, 0);
-		g_object_unref(gc);
-		g_object_unref(pxmp);
-		gtk_window_set_opacity(GTK_WINDOW(engine->drawpanel), 0.62);
-		//	engine->GdkPoints = NULL;
+		gtk_box_pack_end(GTK_BOX(vbox),engine->lookuppanel,FALSE,TRUE,FALSE);
+		gtk_widget_set_size_request(engine->lookuppanel,200,50);
+
+		gtk_window_move((GtkWindow*) engine->drawpanel, 400, 450);
+
+		gtk_widget_add_events(GTK_WIDGET(drawing_area),GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK| GDK_BUTTON_PRESS_MASK);
+
+		g_signal_connect(G_OBJECT(drawing_area),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);
+		g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
+		g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
 	}
-	//	gtk_widget_show_all(engine->drawpanel);
 }
 
 void UI_show_ui(IBusHandwriteEngine * engine)
@@ -257,7 +239,7 @@ void UI_show_ui(IBusHandwriteEngine * engine)
 	printf("%s \n", __func__);
 	if (engine->drawpanel)
 	{
-		gtk_widget_show(engine->drawpanel);
+		gtk_widget_show_all(engine->drawpanel);
 	}
 }
 
@@ -265,7 +247,7 @@ void UI_hide_ui(IBusHandwriteEngine * engine)
 {
 	if (engine->drawpanel)
 	{
-		gtk_widget_hide(engine->drawpanel);
+		gtk_widget_hide_all(engine->drawpanel);
 	}
 }
 
@@ -275,4 +257,43 @@ void UI_cancelui(IBusHandwriteEngine* engine)
 	if (engine->drawpanel)
 		gtk_widget_destroy(engine->drawpanel);
 	engine->drawpanel = NULL;
+}
+
+static void widget_realize(GtkWidget *widget, gpointer user_data)
+{
+	GdkPixmap * pxmp;
+	GdkGC * gc;
+	GdkColor black, white;
+	int R = 5;
+
+	GdkColormap* colormap = gdk_colormap_get_system();
+
+	gdk_color_black(colormap, &black);
+	gdk_color_white(colormap, &white);
+
+	g_object_unref(colormap);
+
+	gtk_window_set_opacity(GTK_WINDOW(widget), 0.62);
+
+	pxmp = gdk_pixmap_new(NULL, 200, 250, 1);
+	gc = gdk_gc_new(GDK_DRAWABLE(pxmp));
+
+	gdk_gc_set_foreground(gc, &black);
+
+	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, 200, 250);
+
+	gdk_gc_set_foreground(gc, &white);
+
+	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, R*2, R*2, 0, 360 * 64);
+	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 0, R*2, R*2, 0, 360
+			* 64);
+	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 250 - R*2, R*2, R*2, 0,
+			360 * 64);
+	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 250 - R*2, R*2, R*2, 0, 360
+			* 64);
+	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, 200, 250 - R*2);
+	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, 200 - R*2, 250);
+	gtk_widget_shape_combine_mask(widget, pxmp, 0, 0);
+	g_object_unref(gc);
+	g_object_unref(pxmp);
 }

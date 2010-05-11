@@ -25,7 +25,7 @@ static void ibus_handwrite_engine_focus_out(IBusHandwriteEngine *engine);
 static void ibus_handwrite_engine_reset(IBusHandwriteEngine *engine);
 static void ibus_handwrite_engine_enable(IBusHandwriteEngine *engine);
 static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine);
-static gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index);
+
 //static void ibus_engine_set_cursor_location(IBusEngine *engine, gint x, gint y,
 //		gint w, gint h);
 //static void ibus_handwrite_engine_set_capabilities(IBusEngine *engine,
@@ -196,7 +196,7 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 	}
 }
 
-static gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index)
+gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index)
 {
 	IBusText *text;
 	MatchedChar * matched;

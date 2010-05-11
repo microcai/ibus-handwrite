@@ -23,6 +23,7 @@ struct _IBusHandwriteEngine
 	/* members */
 	GType		engine_type;
 	GtkWidget * drawpanel;
+	GtkWidget * lookuppanel;
 	GdkPoint lastpoint;
 	guint mouse_state;
 	IbusHandwriteRecog * engine;
@@ -37,6 +38,8 @@ struct _IBusHandwriteEngineClass
 	gboolean (*commit_text)(IBusHandwriteEngine * engine , int index);
 };
 
+
+gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index);
 
 typedef struct _RESULTCHAR RESULTCHAR;
 
