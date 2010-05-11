@@ -13,6 +13,7 @@
 #include <zinnia.h>
 #include "engine.h"
 #include "handrecog.h"
+#include "global_var.h"
 
 typedef struct _IbusHandwriteRecogZinnia IbusHandwriteRecogZinnia;
 typedef struct _IbusHandwriteRecogZinniaClass IbusHandwriteRecogZinniaClass;

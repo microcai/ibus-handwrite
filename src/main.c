@@ -13,8 +13,10 @@
 #define N_(String) gettext_noop (String)
 
 #include "engine.h"
+#include "global_var.h"
 
-static IBusBus *bus = NULL;
+
+IBusBus *bus = NULL;
 static IBusFactory *factory = NULL;
 
 char *tablefile=  TABLEFILE ;

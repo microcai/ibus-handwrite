@@ -16,6 +16,7 @@
 
 #include "engine.h"
 #include "handrecog.h"
+#include "global_var.h"
 
 typedef struct _MATCHED MATCHED;
 typedef struct _IbusHandwriteRecogLucyKila IbusHandwriteRecogLucyKila;

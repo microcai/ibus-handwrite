@@ -44,6 +44,4 @@ gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int in
 
 typedef struct _RESULTCHAR RESULTCHAR;
 
-extern gchar * tablefile;
-extern char lang[20];
 #endif

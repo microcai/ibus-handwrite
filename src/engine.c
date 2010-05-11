@@ -4,6 +4,7 @@
 #include "engine.h"
 #include "handrecog.h"
 #include "UI.h"
+#include "global_var.h"
 
 #include <libintl.h>
 #define _(String) gettext (String)
