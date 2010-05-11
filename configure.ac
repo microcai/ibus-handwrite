@@ -23,7 +23,7 @@
 m4_define([package_name], [ibus-handwrite])
     
 AC_PREREQ([2.63])
-AC_INIT([package_name], [2.0.2], [http://code.google.com/p/ibus/issues/entry], [package_name])
+AC_INIT([package_name], [2.1.0], [http://code.google.com/p/ibus/issues/entry], [package_name])
 AM_INIT_AUTOMAKE([-Wall])
 AC_GNU_SOURCE
 
@@ -82,7 +82,7 @@ AS_IF([test "x${have_zinnia}" = "xyes" ],[
 
 # check ibus
 PKG_CHECK_MODULES(IBUS, [
-    ibus-1.0 >= 1.2
+    ibus-1.0 >= 1.3
 ])
 
 PKG_CHECK_MODULES(GTK2, [
