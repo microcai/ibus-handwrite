@@ -137,6 +137,10 @@ int main(int argc, char* argv[])
 
 	g_object_unref(component);
 
+	GdkScreen * screen = gdk_screen_get_default();
+	GdkColormap * map = gdk_screen_get_rgba_colormap(screen);
+	if(map)	gtk_widget_set_default_colormap(map);
+
 	printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
 
 	gtk_main();

@@ -205,9 +205,12 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 
 		GtkWidget * dialog = gtk_color_selection_dialog_new(prop_name);
 
-		gtk_dialog_run(GTK_DIALOG(dialog));
 
 		GtkWidget * color_sel = gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(dialog));
+
+		gtk_color_selection_set_current_color(GTK_COLOR_SELECTION(color_sel),handwrite->color);
+
+		gtk_dialog_run(GTK_DIALOG(dialog));
 
 		gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(color_sel),handwrite->color);
 

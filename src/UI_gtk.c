@@ -16,36 +16,35 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 {
 	GdkGC *gc;
 	GdkWindow * window;
-
+	GdkColormap * cmap;
+	GtkStyle* style;
 
 	LineStroke cl;
 	int i;
 
 	MatchedChar * matched;
 
-	window = widget->window;
-
-	gc = gdk_gc_new(window);
-
-	gdk_draw_rectangle(window, gc,0,0,0,199,199);
-
-	gdk_draw_rectangle(window, gc,0,200,0,399,199);
-
 	puts(__func__);
 
-	//已经录入的笔画
 
+	style = gtk_style_copy(widget->style);
+
+	style = gtk_style_attach(style,widget->window);
+
+	gtk_paint_shadow(style,widget->window,GTK_STATE_ACTIVE,GTK_SHADOW_ETCHED_OUT,NULL,widget,NULL,0,0,200,200);
+
+	gtk_style_detach(style);
+
+	window = widget->window;
+
+	cmap= gtk_widget_get_colormap(widget);
+	gdk_colormap_alloc_color(cmap,engine->color,FALSE,TRUE);
+
+	gc = gdk_gc_new(window);
 	gdk_gc_set_line_attributes(gc,3,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-
-//	GdkColor color[1];
-
-	engine->color;
-
-//	gdk_color_parse("green",color);
-
-	gdk_colormap_alloc_color(widget->style->colormap,engine->color,FALSE,TRUE);
-
 	gdk_gc_set_foreground(gc,engine->color);
+
+	//已经录入的笔画
 
 	for (i = 0; i < engine->engine->strokes->len ; i++ )
 	{
@@ -58,8 +57,11 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 		gdk_draw_lines(window, gc, engine->currentstroke.points,
 				engine->currentstroke.segments);
 
-	gdk_colormap_free_colors(widget->style->colormap,engine->color,1);
 	g_object_unref(gc);
+
+
+
+	gdk_colormap_free_colors(cmap,engine->color,1);
 	return TRUE;
 }
 
@@ -95,8 +97,6 @@ static void regen_loopuptable(GtkWidget * widget, IBusHandwriteEngine * engine)
 
 		gtk_widget_show(bt);
 	}
-
-//	g_array_free(matched,TRUE);
 }
 
 
@@ -134,6 +134,7 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 	{
 //	printf("move start, x = %lf y = %lf \n",event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
 		gtk_window_move(GTK_WINDOW(engine->drawpanel),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
+//		gtk_window_position
 	}
 
 	return FALSE;
@@ -200,7 +201,8 @@ void UI_buildui(IBusHandwriteEngine * engine)
 	if (!engine->drawpanel)
 	{
 		engine->drawpanel = gtk_window_new(GTK_WINDOW_POPUP);
-		g_signal_connect(G_OBJECT(engine->drawpanel),"realize",G_CALLBACK(widget_realize),engine);
+
+		gtk_window_set_position(GTK_WINDOW(engine->drawpanel),GTK_WIN_POS_MOUSE);
 
 		GtkWidget * vbox = gtk_vbox_new(FALSE,0);
 
@@ -218,10 +220,9 @@ void UI_buildui(IBusHandwriteEngine * engine)
 		gtk_box_pack_end(GTK_BOX(vbox),engine->lookuppanel,FALSE,TRUE,FALSE);
 		gtk_widget_set_size_request(engine->lookuppanel,200,50);
 
-		gtk_window_move((GtkWindow*) engine->drawpanel, 400, 450);
-
 		gtk_widget_add_events(GTK_WIDGET(drawing_area),GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK| GDK_BUTTON_PRESS_MASK);
 
+		g_signal_connect(G_OBJECT(engine->drawpanel),"realize",G_CALLBACK(widget_realize),engine);
 		g_signal_connect(G_OBJECT(drawing_area),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);
 		g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
 		g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
@@ -263,12 +264,9 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 	GdkColor black, white;
 	int R = 5;
 
-	GdkColormap* colormap = gdk_colormap_get_system();
-
-	gdk_color_black(colormap, &black);
-	gdk_color_white(colormap, &white);
-
-	g_object_unref(colormap);
+	//二值图像，白就是 1
+	white.pixel = 1;
+	black.pixel = 0;
 
 	gtk_window_set_opacity(GTK_WINDOW(widget), 0.62);
 
@@ -290,8 +288,11 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 			* 64);
 	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, 200, 250 - R*2);
 	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, 200 - R*2, 250);
+
+	g_object_unref(gc);
+
 	gtk_widget_shape_combine_mask(widget, pxmp, 0, 0);
 	gtk_widget_input_shape_combine_mask(widget, pxmp, 0, 0);
-	g_object_unref(gc);
+
 	g_object_unref(pxmp);
 }
