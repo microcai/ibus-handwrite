@@ -114,7 +114,6 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 		printf("move, x= %lf, Y=%lf, segments = %d \n",event->x,event->y,engine->currentstroke.segments);
 
 		gtk_widget_queue_draw(widget);
-//		gtk_widget_queue_draw(engine->drawpanel);
 
 	}
 	else if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
@@ -156,22 +155,6 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 		engine->currentstroke.points[0].x = event->x;
 		engine->currentstroke.points[0].y = event->y;
 
-
-//		else if ((event->x > 0) && (event->y > 0) && (event->x < 199))
-//		{
-//			int x = event->x;
-//			int y = event->y;
-//			//看鼠标点击的是哪个字，吼吼
-//
-//			for (i = 9; i >= 0; --i)
-//			{
-//				if (((i % 5) * 40 + 3) <= x && ((205 + (20 * (i / 5))) <= y))
-//				{
-//					IBUS_HANDWRITE_ENGINE_GET_CLASS(engine)->commit_text(engine, i);
-//					break;
-//				}
-//			}
-//		}
 		break;
 	case GDK_BUTTON_RELEASE:
 		engine->mouse_state = GDK_BUTTON_RELEASE;
@@ -187,7 +170,7 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 
 		g_print("mouse released\n");
 
-		gtk_widget_queue_draw(widget);//engine->drawpanel);
+		gtk_widget_queue_draw(widget);
 		regen_loopuptable(engine->lookuppanel,engine);
 
 		break;
@@ -199,9 +182,8 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 
 void UI_buildui(IBusHandwriteEngine * engine)
 {
-
-	if (!engine->drawpanel)
 	//建立绘图窗口, 建立空点
+	if (!engine->drawpanel)
 	{
 		engine->drawpanel = gtk_window_new(GTK_WINDOW_POPUP);
 		g_signal_connect(G_OBJECT(engine->drawpanel),"realize",G_CALLBACK(widget_realize),engine);
@@ -294,6 +276,7 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, 200, 250 - R*2);
 	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, 200 - R*2, 250);
 	gtk_widget_shape_combine_mask(widget, pxmp, 0, 0);
+	gtk_widget_input_shape_combine_mask(widget, pxmp, 0, 0);
 	g_object_unref(gc);
 	g_object_unref(pxmp);
 }

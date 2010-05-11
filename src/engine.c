@@ -198,16 +198,13 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 
 gboolean ibus_handwrite_engine_commit_text(IBusHandwriteEngine * engine , int index)
 {
-	IBusText *text;
 	MatchedChar * matched;
 
 	int number = ibus_handwrite_recog_getmatch(engine->engine,&matched,0);
 
 	if(number > index )
 	{
-		text =ibus_text_new_from_string(matched[index].chr);
-		ibus_engine_commit_text(IBUS_ENGINE(engine),text);
-		g_object_unref(text);
+		ibus_engine_commit_text(IBUS_ENGINE(engine),ibus_text_new_from_string(matched[index].chr));
 		ibus_handwrite_recog_clear_stroke(engine->engine);
 		engine->needclear = TRUE;
 		engine->currentstroke.segments = 0;
