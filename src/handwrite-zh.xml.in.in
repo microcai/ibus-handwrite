@@ -3,7 +3,7 @@
 <component>
 	<name>org.freedesktop.IBus.handwrite-zh_CN</name>
 	<description>HandWrite Component</description>
-	<exec>${libexecdir}/ibus-engine-handwrite --ibus</exec>
+	<exec>${libexecdir}/ibus-engine-handwrite --ibus --lang=zh_CN</exec>
 	<version>@VERSION@</version>
 	<author>Microcai &lt;microcai AT fedoraproject DOT org &gt;</author>
 	<license>GPL</license>
@@ -12,7 +12,7 @@
 
 	<engines>
 		<engine>
-			<name>handwrite-zh</name>
+			<name>handwrite-zh_CN</name>
 			<language>zh_CN</language>
 			<license>GPL</license>
 			<author>Microcai &lt;microcai AT fedoraproject DOT org &gt;</author>

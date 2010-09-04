@@ -89,8 +89,12 @@ PKG_CHECK_MODULES(GTK2, [
     gtk+-2.0 >= 2.10
 ])
 
+PKG_CHECK_MODULES(GTKGL, [
+    gtkglext-1.0
+])
+
 PKG_CHECK_MODULES(ALL_NEED, [
-    ibus-1.0 >= 1.2 gtk+-2.0 >= 2.10
+    ibus-1.0 >= 1.2 gtkglext-1.0
 ])
 
 AM_GNU_GETTEXT([external])

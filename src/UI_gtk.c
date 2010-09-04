@@ -7,6 +7,9 @@
 
 
 #include <gtk/gtk.h>
+#include <gtk/gtkgl.h>
+#include <GL/gl.h>
+
 #include "engine.h"
 #include "UI.h"
 
@@ -59,9 +62,90 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 
 	g_object_unref(gc);
 
-
-
 	gdk_colormap_free_colors(cmap,engine->color,1);
+	return TRUE;
+}
+
+static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
+{
+	GdkGLDrawable * gldrawable;
+	GdkGLContext  * glcontext;
+
+	LineStroke cl;
+	int i;
+
+	gldrawable = gtk_widget_get_gl_drawable(widget);
+	glcontext  = gtk_widget_get_gl_context(widget);
+
+	g_assert(gdk_gl_drawable_gl_begin(gldrawable,glcontext));
+
+	glClearColor(1,1,1,1);
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glColor3ub(255,0,0);
+
+	//已经录入的笔画
+	for (i = 0; i < engine->engine->strokes->len ; i++ )
+	{
+		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
+		cl =  g_array_index(engine->engine->strokes,LineStroke,i);
+
+		glBegin(GL_LINES);
+
+		int j;
+
+		for( j = 0 ; j < cl.segments ; ++j)
+		{
+			glVertex2f((float)cl.points[j].x/100 - 1 ,1 - (float)cl.points[j].y/100  );
+
+			g_print("draw point %f , %f \n",(float)cl.points[j].x/100 - 1 ,1 - (float)cl.points[j].y/100  );
+			//cl.points.x
+		}
+		//gdk_draw_lines(window, gc, cl.points,cl.segments );
+		glEnd();
+	}
+	//当下笔画
+	if ( engine->currentstroke.segments && engine->currentstroke.points )
+	{
+		glBegin(GL_LINES);
+
+		int j;
+
+		for( j = 0 ; j < engine->currentstroke.segments ; ++j)
+		{
+			glVertex2f((float)engine->currentstroke.points[j].x/100 - 1,1 - (float)engine->currentstroke.points[j].y/100 );
+		}
+		glEnd();
+
+		//gdk_draw_lines(window, gc, engine->currentstroke.points,engine->currentstroke.segments);
+	}
+
+
+	if(gdk_gl_drawable_is_double_buffered(gldrawable))
+		gdk_gl_drawable_swap_buffers(gldrawable);
+	else
+		glFinish();
+
+	gdk_gl_drawable_gl_end(gldrawable);
+}
+
+static gboolean widget_resize(GtkWidget *widget, GdkEventConfigure *event,IBusHandwriteEngine * engine)
+{
+	GdkGLDrawable * gldrawable;
+	GdkGLContext  * glcontext;
+
+	gldrawable = gtk_widget_get_gl_drawable(widget);
+	glcontext  = gtk_widget_get_gl_context(widget);
+
+	g_assert(gdk_gl_drawable_gl_begin(gldrawable,glcontext));
+
+	glViewport(0,0,event->width,event->height);
+
+	glFinish();
+
+	gdk_gl_drawable_gl_end(gldrawable);
+
 	return TRUE;
 }
 
@@ -128,6 +212,8 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 		printf("move, x= %lf, Y=%lf, segments = %d \n",event->x,event->y,engine->currentstroke.segments);
 
 		gtk_widget_queue_draw(widget);
+	    while (gtk_events_pending ())
+	        gtk_main_iteration ();
 
 	}
 	else if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
@@ -210,10 +296,27 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		GtkWidget * drawing_area = gtk_drawing_area_new();
 
-		gtk_widget_set_size_request(drawing_area,200,200);
+		GdkGLConfig * glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_DOUBLE);
+
+
+		if (gtk_widget_set_gl_capability(drawing_area, glconfig, NULL, FALSE,
+				GDK_GL_RGBA_TYPE))
+		{
+			g_signal_connect(G_OBJECT(drawing_area),"configure-event",G_CALLBACK(widget_resize),engine);
+
+			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines_gl),engine);
+		}
+		else
+		{
+			//没有 GLX 就使用普通 GDK 绘图
+			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines),engine);
+		}
+
 
 		gtk_box_pack_start(GTK_BOX(vbox),drawing_area,FALSE,TRUE,FALSE);
-		g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines),engine);
+
+
+		gtk_widget_set_size_request(drawing_area,200,200);
 
 		engine->lookuppanel = gtk_table_new(2,5,TRUE);
 
@@ -221,6 +324,7 @@ void UI_buildui(IBusHandwriteEngine * engine)
 		gtk_widget_set_size_request(engine->lookuppanel,200,50);
 
 		gtk_widget_add_events(GTK_WIDGET(drawing_area),GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK| GDK_BUTTON_PRESS_MASK);
+
 
 		g_signal_connect(G_OBJECT(engine->drawpanel),"realize",G_CALLBACK(widget_realize),engine);
 		g_signal_connect(G_OBJECT(drawing_area),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);

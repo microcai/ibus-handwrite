@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <ibus.h>
 #include <locale.h>
+#include <gtk/gtkgl.h>
 
 #include <libintl.h>
 #define _(String) gettext (String)
@@ -55,7 +56,10 @@ int main(int argc, char* argv[])
 			{0}
 	};
 
-	if(G_UNLIKELY(!gtk_init_with_args(&argc, &argv,PACKAGE_STRING,args,NULL,&err)))
+	gtk_init_with_args(&argc,&argv,PACKAGE_NAME,args,PACKAGE_NAME,&err);
+
+
+	if(G_UNLIKELY(!gtk_gl_init_check(&argc, &argv)))
 	{
 		g_error("%s",err->message);
 	}

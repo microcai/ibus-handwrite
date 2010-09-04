@@ -40,12 +40,14 @@ LIBS += @ALL_NEED_LIBS@
 libexec_PROGRAMS = ibus-engine-handwrite
 
 ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	\
-					  UI_gtk.c \
 					  handrecog_lucykila.c \
 					  handrecog.c \
 					  handrecog.h \
-					  UI.h \
-					  $(NULL)
+					  UI.h 
+
+
+ibus_engine_handwrite_SOURCES +=   UI_gtk.c \
+ 					  $(NULL)
 
 if WITH_ZINNIA
 ibus_engine_handwrite_SOURCES +=  handrecog_zinnia.c

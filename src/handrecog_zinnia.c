@@ -10,7 +10,7 @@
 #endif
 
 #include <string.h>
-#include <zinnia.h>
+#include <zinnia/zinnia.h>
 #include "engine.h"
 #include "handrecog.h"
 #include "global_var.h"
