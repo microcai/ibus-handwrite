@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
 	if(G_UNLIKELY(!gtk_gl_init_check(&argc, &argv)))
 	{
-		g_error("%s",err->message);
+		g_warning("GLX extension not available, use slow soft cairo rendering instead");
 	}
 
 #ifdef WITH_ZINNIA

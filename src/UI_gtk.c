@@ -70,18 +70,21 @@ static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHand
 {
 	GdkGLDrawable * gldrawable;
 	GdkGLContext  * glcontext;
+	gint			width,height;
 
 	LineStroke cl;
-	int i;
+	int i,j;
 
 	gldrawable = gtk_widget_get_gl_drawable(widget);
 	glcontext  = gtk_widget_get_gl_context(widget);
 
 	g_assert(gdk_gl_drawable_gl_begin(gldrawable,glcontext));
 
+	gdk_gl_drawable_get_size(gldrawable,&width,&height);
+
 	glClearColor(1,1,1,1);
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 	glColor3ub(255,0,0);
 
@@ -91,34 +94,24 @@ static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHand
 		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
 		cl =  g_array_index(engine->engine->strokes,LineStroke,i);
 
-		glBegin(GL_LINES);
-
-		int j;
+		glBegin(GL_LINE_STRIP);
 
 		for( j = 0 ; j < cl.segments ; ++j)
 		{
-			glVertex2f((float)cl.points[j].x/100 - 1 ,1 - (float)cl.points[j].y/100  );
-
-			g_print("draw point %f , %f \n",(float)cl.points[j].x/100 - 1 ,1 - (float)cl.points[j].y/100  );
-			//cl.points.x
+			glVertex2f((float)cl.points[j].x *2 /width - 1 ,1 - (float)cl.points[j].y*2/height);
 		}
-		//gdk_draw_lines(window, gc, cl.points,cl.segments );
 		glEnd();
 	}
 	//当下笔画
 	if ( engine->currentstroke.segments && engine->currentstroke.points )
 	{
-		glBegin(GL_LINES);
-
-		int j;
+		glBegin(GL_LINE_STRIP);
 
 		for( j = 0 ; j < engine->currentstroke.segments ; ++j)
 		{
-			glVertex2f((float)engine->currentstroke.points[j].x/100 - 1,1 - (float)engine->currentstroke.points[j].y/100 );
+			glVertex2f((float)engine->currentstroke.points[j].x*2/width - 1,1 - (float)engine->currentstroke.points[j].y*2/height);
 		}
 		glEnd();
-
-		//gdk_draw_lines(window, gc, engine->currentstroke.points,engine->currentstroke.segments);
 	}
 
 
@@ -147,6 +140,24 @@ static gboolean widget_resize(GtkWidget *widget, GdkEventConfigure *event,IBusHa
 	gdk_gl_drawable_gl_end(gldrawable);
 
 	return TRUE;
+}
+
+static void glwidget_realize(GtkWidget *widget, gpointer user_data)
+{
+
+	GdkGLDrawable * gldrawable;
+	GdkGLContext  * glcontext;
+
+	gldrawable = gtk_widget_get_gl_drawable(widget);
+	glcontext  = gtk_widget_get_gl_context(widget);
+
+	if (gdk_gl_drawable_gl_begin(gldrawable, glcontext))
+	{
+		glEnable(GL_LINE_SMOOTH);
+		glLineWidth(3);
+		glFinish();
+		gdk_gl_drawable_gl_end(gldrawable);
+	}
 }
 
 static void regen_loopuptable(GtkWidget * widget, IBusHandwriteEngine * engine)
@@ -296,25 +307,21 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		GtkWidget * drawing_area = gtk_drawing_area_new();
 
-		GdkGLConfig * glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_DOUBLE);
-
+		GdkGLConfig * glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_DOUBLE|GDK_GL_MODE_MULTISAMPLE);
 
 		if (gtk_widget_set_gl_capability(drawing_area, glconfig, NULL, FALSE,
 				GDK_GL_RGBA_TYPE))
 		{
 			g_signal_connect(G_OBJECT(drawing_area),"configure-event",G_CALLBACK(widget_resize),engine);
-
-			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines_gl),engine);
-		}
+			g_signal_connect(G_OBJECT(drawing_area),"realize",G_CALLBACK(glwidget_realize),engine);
+			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines_gl),engine);		}
 		else
 		{
 			//没有 GLX 就使用普通 GDK 绘图
 			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines),engine);
 		}
 
-
 		gtk_box_pack_start(GTK_BOX(vbox),drawing_area,FALSE,TRUE,FALSE);
-
 
 		gtk_widget_set_size_request(drawing_area,200,200);
 
@@ -397,6 +404,5 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 
 	gtk_widget_shape_combine_mask(widget, pxmp, 0, 0);
 	gtk_widget_input_shape_combine_mask(widget, pxmp, 0, 0);
-
 	g_object_unref(pxmp);
 }
