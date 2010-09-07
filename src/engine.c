@@ -42,27 +42,9 @@ static void ibus_handwrite_property_activate(IBusEngine *engine,
 //static void ibus_handwrite_engine_property_hide(IBusEngine *engine,
 //		const gchar *prop_name);
 
-static IBusEngineClass *parent_class = NULL;
+//static IBusEngineClass *ibus_handwrite_engine_parent_class = NULL;
 
-GType ibus_handwrite_engine_get_type(void)
-{
-	static GType type = 0;
-
-	static const GTypeInfo type_info =
-	{ sizeof(IBusHandwriteEngineClass), (GBaseInitFunc) NULL,
-			(GBaseFinalizeFunc) NULL,
-			(GClassInitFunc) ibus_handwrite_engine_class_init, NULL, NULL,
-			sizeof(IBusHandwriteEngine), 0,
-			(GInstanceInitFunc) ibus_handwrite_engine_init, };
-
-	if (type == 0)
-	{
-		type = g_type_register_static(IBUS_TYPE_ENGINE, "IBusHandwriteEngine",
-				&type_info, (GTypeFlags) 0);
-	}
-
-	return type;
-}
+G_DEFINE_TYPE(IBusHandwriteEngine,ibus_handwrite_engine,IBUS_TYPE_ENGINE)
 
 static void ibus_handwrite_engine_class_init(IBusHandwriteEngineClass *klass)
 {
@@ -70,7 +52,7 @@ static void ibus_handwrite_engine_class_init(IBusHandwriteEngineClass *klass)
 	IBusObjectClass *ibus_object_class = IBUS_OBJECT_CLASS (klass);
 	IBusEngineClass *engine_class = IBUS_ENGINE_CLASS (klass);
 
-	parent_class = (IBusEngineClass *) g_type_class_peek_parent(klass);
+//	parent_class = (IBusEngineClass *) g_type_class_peek_parent(klass);
 
 	ibus_object_class->destroy
 			= (IBusObjectDestroyFunc) ibus_handwrite_engine_destroy;
@@ -113,7 +95,7 @@ static void ibus_handwrite_engine_destroy(IBusHandwriteEngine *handwrite)
 {
 	g_object_unref(handwrite->engine);
 	ibus_handwrite_engine_disable(handwrite);
-	IBUS_OBJECT_CLASS (parent_class)->destroy((IBusObject *) handwrite);
+	IBUS_OBJECT_CLASS (ibus_handwrite_engine_parent_class)->destroy((IBusObject *) handwrite);
 }
 
 static void ibus_handwrite_engine_enable(IBusHandwriteEngine *engine)
