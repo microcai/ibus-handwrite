@@ -85,7 +85,6 @@ static gboolean ibus_handwrite_recog_zinnia_domatch(IbusHandwriteRecog*obj,int w
 	zinnia_character_set_width(character, 200);
 	zinnia_character_set_height(character, 200);
 
-
 	for (ii=0; ii < obj->strokes->len ; ++ii)
 	{
 		cl = g_array_index(obj->strokes, LineStroke , ii);
@@ -124,7 +123,6 @@ static gboolean ibus_handwrite_recog_zinnia_domatch(IbusHandwriteRecog*obj,int w
 	zinnia_result_destroy(result);
 	zinnia_character_destroy(character);
 	return TRUE;
-
 }
 
 
