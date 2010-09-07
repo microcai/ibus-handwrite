@@ -68,12 +68,18 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 
 static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
 {
+	GdkColormap * cmap;
 	GdkGLDrawable * gldrawable;
 	GdkGLContext  * glcontext;
 	gint			width,height;
 
 	LineStroke cl;
 	int i,j;
+
+
+	cmap= gtk_widget_get_colormap(widget);
+	gdk_colormap_alloc_color(cmap,engine->color,FALSE,TRUE);
+
 
 	gldrawable = gtk_widget_get_gl_drawable(widget);
 	glcontext  = gtk_widget_get_gl_context(widget);
@@ -82,11 +88,13 @@ static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHand
 
 	gdk_gl_drawable_get_size(gldrawable,&width,&height);
 
-	glClearColor(1,1,1,1);
+	glClearColor(240,240,230,1);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-	glColor3ub(255,0,0);
+	glColor3us(engine->color->red,engine->color->green,engine->color->blue);
+
+	gdk_colormap_free_colors(cmap,engine->color,1);
 
 	//已经录入的笔画
 	for (i = 0; i < engine->engine->strokes->len ; i++ )
