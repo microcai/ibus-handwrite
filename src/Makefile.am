@@ -39,11 +39,15 @@ LIBS += @ALL_NEED_LIBS@
 
 libexec_PROGRAMS = ibus-engine-handwrite
 
-ibus_engine_handwrite_SOURCES =  main.c 	engine.c 	engine.h	\
-					  handrecog_lucykila.c \
-					  handrecog.c \
-					  handrecog.h \
-					  UI.h 
+ibus_engine_handwrite_SOURCES =  main.c	\
+				engine.c \
+				engine.h\
+				global_var.h \
+				handrecog_lucykila.c\
+				handrecog.c \
+				handrecog.h \
+				UI.h \
+				$(NULL)
 
 
 ibus_engine_handwrite_SOURCES +=   UI_gtk.c \
