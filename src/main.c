@@ -22,7 +22,7 @@ static IBusFactory *factory = NULL;
 
 char *tablefile=  TABLEFILE ;
 char icondir[4096]= PKGDATADIR"/icons";
-char lang[20]	= "zh";
+char lang[20]	= "zh_CN";
 
 int main(int argc, char* argv[])
 {
@@ -50,14 +50,16 @@ int main(int argc, char* argv[])
 			{"icondir",'\0',0,G_OPTION_ARG_STRING,&icon_dir,_("the icon file"),N_("icon file")},
 			{"table",'\0',0,G_OPTION_ARG_STRING,&tablefile,_("set table file path"),N_("tablefile")},
 			{"locale",'\0',0,G_OPTION_ARG_STRING,&locale_dir,_("set locale path"),N_("locale")},
-#ifdef WITH_ZINNIA
 			{"lang",'\0',0,G_OPTION_ARG_STRING,&language,_("set languate, accept zh and jp"),N_("lang")},
-#endif
 			{0}
 	};
 
 	gtk_init_with_args(&argc,&argv,PACKAGE_NAME,args,PACKAGE_NAME,&err);
 
+	if(err)
+	{
+		g_error("git init fail %s",err->message		);
+	}
 
 	if(G_UNLIKELY(!gtk_gl_init_check(&argc, &argv)))
 	{
@@ -114,7 +116,7 @@ int main(int argc, char* argv[])
 				exefile, GETTEXT_PACKAGE);
 
 		gchar * iconfile =  g_strdup_printf("%s/ibus-handwrite.svg",icondir);
-
+		
 		desc = ibus_engine_desc_new(engine_name, "handwrite",
 				_("hand write recognizer"), lang, "GPL",
 				MICROCAI_WITHEMAIL, iconfile, "us");

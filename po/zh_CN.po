@@ -6,69 +6,70 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.01\n"
 "Report-Msgid-Bugs-To: http://code.google.com/p/ibus/issues/entry\n"
-"POT-Creation-Date: 2010-05-12 20:12+0800\n"
+"POT-Creation-Date: 2010-11-22 20:43+0800\n"
 "PO-Revision-Date: 2010-01-28 01:44+0800\n"
 "Last-Translator: microcai <microcai@fedoraproject.org>\n"
 "Language-Team: zh_CN <microcai@fedoraproject.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: UTF-8\n"
 
-#: src/main.c:49
+#: src/main.c:50
 msgid "the icon file"
 msgstr "icon 文件"
 
-#: src/main.c:49
+#: src/main.c:50
 msgid "icon file"
 msgstr "icon 文件"
 
-#: src/main.c:50
+#: src/main.c:51
 msgid "set table file path"
 msgstr "设置表"
 
-#: src/main.c:50
+#: src/main.c:51
 msgid "tablefile"
 msgstr "表文件"
 
-#: src/main.c:51
+#: src/main.c:52
 #, fuzzy
 msgid "set locale path"
 msgstr "设置表"
 
-#: src/main.c:51
+#: src/main.c:52
 msgid "locale"
 msgstr ""
 
-#: src/main.c:53
+#: src/main.c:54
 msgid "set languate, accept zh and jp"
 msgstr "设置语言，接受zh和jp"
 
-#: src/main.c:53
+#: src/main.c:54
 msgid "lang"
 msgstr "语言"
 
-#: src/main.c:115
+#: src/main.c:119
 msgid "hand write recognizer"
 msgstr "手写识别"
 
-#: src/main.c:146
+#: src/main.c:150
 #, c-format
 msgid "ibus-handwrite Version %s Start Up\n"
 msgstr "ibus-handwrite 版本 %s 启动\n"
 
-#: src/engine.c:143
+#: src/engine.c:125
 msgid "color"
 msgstr ""
 
-#: src/engine.c:144
+#: src/engine.c:126
 #, fuzzy
 msgid "click to set color"
 msgstr "单击切换引擎"
 
-#: src/engine.c:159
+#: src/engine.c:141
 msgid "engine"
 msgstr "识别引擎"
 
-#: src/engine.c:160
+#: src/engine.c:142
 msgid "click to set engine"
 msgstr "单击切换引擎"
