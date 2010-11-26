@@ -13,6 +13,11 @@
 #include "engine.h"
 #include "UI.h"
 
+#include <libintl.h>
+#define _(String) gettext (String)
+#define N_(String) gettext_noop (String)
+
+
 static void widget_realize(GtkWidget *widget, gpointer user_data);
 
 static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
@@ -306,6 +311,13 @@ void UI_buildui(IBusHandwriteEngine * engine)
 	if (!engine->drawpanel)
 	{
 		engine->drawpanel = gtk_window_new(GTK_WINDOW_POPUP);
+
+                gtk_widget_set_tooltip_markup(GTK_WIDGET(engine->drawpanel),
+                                              _("<b>Hint:</b>\n"
+                                                "Left mouse key to draw strokes.\n"
+                                                "Holding right mouse key to move the widget.\n"
+                                                ));
+
 
 		gtk_window_set_position(GTK_WINDOW(engine->drawpanel),GTK_WIN_POS_MOUSE);
 
