@@ -217,13 +217,24 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 
 	GdkCursorType ct ;
 
-	ct = event->y < 200 ?  GDK_PENCIL:GDK_CENTER_PTR;
+	guint width,height;
+
+	gtk_window_get_size(GTK_WINDOW(engine->drawpanel),&width,&height);
+
+
+	ct = event->y < (height-50) ?  GDK_PENCIL:GDK_CENTER_PTR;
 
 	if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
 		ct = GDK_FLEUR;
 
+	if(event->state & GDK_BUTTON2_MASK )
+		ct = GDK_BOTTOM_RIGHT_CORNER;
+
+	gdk_window_set_cursor(widget->window,gdk_cursor_new(ct));
+
 	if (engine->mouse_state == GDK_BUTTON_PRESS) // 鼠标按下状态
 	{
+		gdk_window_set_cursor(widget->window,gdk_cursor_new(ct));
 
 		engine->currentstroke.points
 				= g_renew(GdkPoint,engine->currentstroke.points,engine->currentstroke.segments +1  );
@@ -240,13 +251,25 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 	        gtk_main_iteration ();
 
 	}
+	else if(event->state & GDK_BUTTON2_MASK)
+	{
+		// change size
+		width += event->x - engine->lastpoint.x;
+		height += event->y - engine->lastpoint.y;
+
+		gtk_window_resize(GTK_WINDOW(engine->drawpanel),width,height);
+
+		g_debug("set size to %d,%d",width,height);
+
+		widget_realize(engine->drawpanel,engine);
+
+		engine->lastpoint.x = event->x;
+		engine->lastpoint.y = event->y;
+	}
 	else if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
 	{
-//	printf("move start, x = %lf y = %lf \n",event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
 		gtk_window_move(GTK_WINDOW(engine->drawpanel),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
-//		gtk_window_position
 	}
-
 	return FALSE;
 }
 
@@ -341,7 +364,9 @@ void UI_buildui(IBusHandwriteEngine * engine)
 			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines),engine);
 		}
 
-		gtk_box_pack_start(GTK_BOX(vbox),drawing_area,FALSE,TRUE,FALSE);
+		gtk_box_pack_start(GTK_BOX(vbox),drawing_area,TRUE,TRUE,FALSE);
+
+//		gtk_window_get_default_size(GTK_WINDOW(engine->drawpanel),200,250);
 
 		gtk_widget_set_size_request(drawing_area,200,200);
 
@@ -394,6 +419,7 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 	GdkGC * gc;
 	GdkColor black, white;
 	int R = 5;
+	guint	width,height;
 
 	//二值图像，白就是 1
 	white.pixel = 1;
@@ -401,27 +427,30 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 
 	gtk_window_set_opacity(GTK_WINDOW(widget), 0.62);
 
-	pxmp = gdk_pixmap_new(NULL, 200, 250, 1);
+	gtk_window_get_size(GTK_WINDOW(widget),&width,&height);
+
+	pxmp = gdk_pixmap_new(NULL, width, height, 1);
 	gc = gdk_gc_new(GDK_DRAWABLE(pxmp));
 
 	gdk_gc_set_foreground(gc, &black);
 
-	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, 200, 250);
+	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, width, height);
 
 	gdk_gc_set_foreground(gc, &white);
 
 	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, R*2, R*2, 0, 360 * 64);
-	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 0, R*2, R*2, 0, 360
+	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, width - R*2, 0, R*2, R*2, 0, 360
 			* 64);
-	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 200 - R*2, 250 - R*2, R*2, R*2, 0,
+	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, width - R*2, height - R*2, R*2, R*2, 0,
 			360 * 64);
-	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 250 - R*2, R*2, R*2, 0, 360
+	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, height - R*2, R*2, R*2, 0, 360
 			* 64);
-	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, 200, 250 - R*2);
-	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, 200 - R*2, 250);
+	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, width, height - R*2);
+	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, width - R*2, height);
 
 	g_object_unref(gc);
 
+	gtk_widget_reset_shapes(widget);
 	gtk_widget_shape_combine_mask(widget, pxmp, 0, 0);
 	gtk_widget_input_shape_combine_mask(widget, pxmp, 0, 0);
 	g_object_unref(pxmp);
