@@ -89,6 +89,7 @@ static void ibus_handwrite_engine_init(IBusHandwriteEngine *handwrite)
 #endif
 
 	handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
+	handwrite->engine->engine = handwrite;
 }
 
 static void ibus_handwrite_engine_destroy(IBusHandwriteEngine *handwrite)
@@ -181,6 +182,7 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 			handwrite->engine_type = G_TYPE_IBUS_HANDWRITE_RECOG_ZINNIA;
 
 		handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
+		handwrite->engine->engine = handwrite;
 
 	}else if(g_strcmp0(prop_name,"choose-color")==0)
 	{

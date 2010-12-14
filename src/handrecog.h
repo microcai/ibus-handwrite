@@ -31,6 +31,7 @@ struct _IbusHandwriteRecog{
 	GObject parent;
 	GArray  * matched;
 	GArray  * strokes;
+	struct _IBusHandwriteEngine * engine;
 };
 
 struct _IbusHandwriteRecogClass{
