@@ -20,6 +20,7 @@
 
 icons_DATA = \
 	ibus-handwrite.svg \
+	switch.svg\
 	$(NULL)
 
 iconsdir = $(pkgdatadir)/icons
