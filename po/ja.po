@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.01\n"
 "Report-Msgid-Bugs-To: http://code.google.com/p/ibus/issues/entry\n"
-"POT-Creation-Date: 2010-12-14 11:29+0800\n"
+"POT-Creation-Date: 2011-01-26 08:05+0800\n"
 "PO-Revision-Date: 2010-01-28 01:44+0800\n"
 "Last-Translator: microcai <microcai@fedoraproject.org>\n"
 "Language-Team: ja <microcai@fedoraproject.org>\n"
@@ -15,43 +15,43 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: UTF-8\n"
 
-#: src/main.c:50
+#: src/main.c:49
 msgid "the icon file"
 msgstr ""
 
-#: src/main.c:50
+#: src/main.c:49
 msgid "icon file"
 msgstr ""
 
-#: src/main.c:51
+#: src/main.c:50
 msgid "set table file path"
 msgstr ""
 
-#: src/main.c:51
+#: src/main.c:50
 msgid "tablefile"
 msgstr ""
 
-#: src/main.c:52
+#: src/main.c:51
 msgid "set locale path"
 msgstr ""
 
-#: src/main.c:52
+#: src/main.c:51
 msgid "locale"
 msgstr ""
 
-#: src/main.c:53
+#: src/main.c:52
 msgid "set languate, accept zh and jp"
 msgstr ""
 
-#: src/main.c:53
+#: src/main.c:52
 msgid "lang"
 msgstr ""
 
-#: src/main.c:121
+#: src/main.c:120
 msgid "hand write recognizer"
 msgstr ""
 
-#: src/main.c:152
+#: src/main.c:151
 #, c-format
 msgid "ibus-handwrite Version %s Start Up\n"
 msgstr "ibus-handwrite バージョン %s を起動\n"

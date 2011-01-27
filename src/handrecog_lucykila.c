@@ -4,6 +4,9 @@
  *  Created on: 2010-2-7
  *      Author: cai
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <sys/types.h>
 #include <unistd.h>

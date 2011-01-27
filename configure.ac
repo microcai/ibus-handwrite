@@ -100,7 +100,15 @@ PKG_CHECK_MODULES(ALL_NEED, [
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION(0.16.1)
 
-AC_DEFINE_UNQUOTED(ICONDIR,${prefix}/ibus/icons,[icon filedir])
+#AC_DEFINE_UNQUOTED(ICONDIR,"${sharedstatedir}/ibus/icons",[icon filedir])
+
+AC_CHECK_DECL(MAP_ANONYMOUS,[],
+	[
+		AC_DEFINE(MAP_ANONYMOUS,MAP_ANON,[Define this because some platform only define MAP_ANON])
+	],
+	[[
+		#include <sys/mman.h>
+	]])
 
 
 AC_DEFINE(MICROCAI_WITHEMAIL,"microcai@fedoraproject.org",[author microcai and his email])
