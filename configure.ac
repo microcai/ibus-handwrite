@@ -31,9 +31,10 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # define PACKAGE_VERSION_* variables
-AC_PROG_CC
+AC_PROG_CC_C99
 AC_ISC_POSIX
 AC_HEADER_STDC
+AC_PROG_MKDIR_P
 
 PKG_PROG_PKG_CONFIG
 
@@ -85,20 +86,17 @@ PKG_CHECK_MODULES(IBUS, [
     ibus-1.0 >= 1.3
 ])
 
-PKG_CHECK_MODULES(GTK2, [
-    gtk+-2.0 >= 2.10
+PKG_CHECK_MODULES(CLUTTOR, [
+    clutter-1.0 clutter-cogl-1.0
 ])
 
-PKG_CHECK_MODULES(GTKGL, [
-    gtkglext-1.0
-])
+#PKG_CHECK_MODULES(GTKGL, [
+#    gtkglext-1.0
+#])
 
 PKG_CHECK_MODULES(ALL_NEED, [
-    ibus-1.0 >= 1.2 gtkglext-1.0
+  clutter-1.0 clutter-cogl-1.0  ibus-1.0 >= 1.3 
 ])
-
-AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION(0.16.1)
 
 #AC_DEFINE_UNQUOTED(ICONDIR,"${sharedstatedir}/ibus/icons",[icon filedir])
 
@@ -113,7 +111,7 @@ AC_CHECK_DECL(MAP_ANONYMOUS,[],
 
 AC_DEFINE(MICROCAI_WITHEMAIL,"microcai@fedoraproject.org",[author microcai and his email])
 # OUTPUT files
-AC_CONFIG_FILES(po/Makefile.in
+AC_CONFIG_FILES(
 Makefile
 ibus-handwrite.spec
 src/Makefile

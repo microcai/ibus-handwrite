@@ -6,9 +6,7 @@
  */
 
 
-#include <gtk/gtk.h>
-#include <gtk/gtkgl.h>
-#include <GL/gl.h>
+#include <clutter/clutter.h>
 
 #include "engine.h"
 #include "UI.h"
@@ -18,61 +16,11 @@
 #define N_(String) gettext_noop (String)
 
 
-static void widget_realize(GtkWidget *widget, gpointer user_data);
-
-static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
-{
-	GdkGC *gc;
-	GdkWindow * window;
-	GdkColormap * cmap;
-	GtkStyle* style;
-
-	LineStroke cl;
-	int i;
-
-	MatchedChar * matched;
-
-	puts(__func__);
-
-
-	style = gtk_style_copy(widget->style);
-
-	style = gtk_style_attach(style,widget->window);
-
-	gtk_paint_shadow(style,widget->window,GTK_STATE_ACTIVE,GTK_SHADOW_ETCHED_OUT,NULL,widget,NULL,0,0,200,200);
-
-	gtk_style_detach(style);
-
-	window = widget->window;
-
-	cmap= gtk_widget_get_colormap(widget);
-	gdk_colormap_alloc_color(cmap,engine->color,FALSE,TRUE);
-
-	gc = gdk_gc_new(window);
-	gdk_gc_set_line_attributes(gc,3,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-	gdk_gc_set_foreground(gc,engine->color);
-
-	//已经录入的笔画
-
-	for (i = 0; i < engine->engine->strokes->len ; i++ )
-	{
-		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
-		cl =  g_array_index(engine->engine->strokes,LineStroke,i);
-		gdk_draw_lines(window, gc, cl.points,cl.segments );
-	}
-	//当下笔画
-	if ( engine->currentstroke.segments && engine->currentstroke.points )
-		gdk_draw_lines(window, gc, engine->currentstroke.points,
-				engine->currentstroke.segments);
-
-	g_object_unref(gc);
-
-	gdk_colormap_free_colors(cmap,engine->color,1);
-	return TRUE;
-}
+static void widget_realize(ClutterActor *widget, gpointer user_data);
 
 static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
 {
+#if 0
 	GdkColormap * cmap;
 	GdkGLDrawable * gldrawable;
 	GdkGLContext  * glcontext;
@@ -134,10 +82,12 @@ static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHand
 		glFinish();
 
 	gdk_gl_drawable_gl_end(gldrawable);
+#endif
 }
 
 static gboolean widget_resize(GtkWidget *widget, GdkEventConfigure *event,IBusHandwriteEngine * engine)
 {
+#if 0
 	GdkGLDrawable * gldrawable;
 	GdkGLContext  * glcontext;
 
@@ -153,11 +103,12 @@ static gboolean widget_resize(GtkWidget *widget, GdkEventConfigure *event,IBusHa
 	gdk_gl_drawable_gl_end(gldrawable);
 
 	return TRUE;
+#endif
 }
 
 static void glwidget_realize(GtkWidget *widget, gpointer user_data)
 {
-
+#if 0
 	GdkGLDrawable * gldrawable;
 	GdkGLContext  * glcontext;
 
@@ -171,10 +122,13 @@ static void glwidget_realize(GtkWidget *widget, gpointer user_data)
 		glFinish();
 		gdk_gl_drawable_gl_end(gldrawable);
 	}
+#endif
 }
 
-static void regen_loopuptable(GtkWidget * widget, IBusHandwriteEngine * engine)
+static void regen_loopuptable(ClutterActor * widget, IBusHandwriteEngine * engine)
 {
+	return ;
+#if 0
 	int i;
 	MatchedChar *matched;
 	char drawtext[32]={0};
@@ -205,12 +159,14 @@ static void regen_loopuptable(GtkWidget * widget, IBusHandwriteEngine * engine)
 
 		gtk_widget_show(bt);
 	}
+#endif
 }
 
 
 static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 		gpointer user_data)
 {
+#if 0
 	IBusHandwriteEngine * engine;
 
 	engine = (IBusHandwriteEngine *) (user_data);
@@ -270,10 +226,11 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 	{
 		gtk_window_move(GTK_WINDOW(engine->drawpanel),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
 	}
+#endif
 	return FALSE;
 }
 
-static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer user_data)
+static gboolean on_button(ClutterActor* widget, GdkEventButton *event, gpointer user_data)
 {
 	int i;
 	IBusHandwriteEngine * engine;
@@ -318,7 +275,7 @@ static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer use
 
 		g_print("mouse released\n");
 
-		gtk_widget_queue_draw(widget);
+		clutter_actor_queue_redraw(widget);
 		regen_loopuptable(engine->lookuppanel,engine);
 
 		break;
@@ -333,28 +290,29 @@ void UI_buildui(IBusHandwriteEngine * engine)
 	//建立绘图窗口, 建立空点
 	if (!engine->drawpanel)
 	{
-		engine->drawpanel = gtk_window_new(GTK_WINDOW_POPUP);
+		engine->drawpanel = clutter_actor_new();
 
+/*
                 gtk_widget_set_tooltip_markup(GTK_WIDGET(engine->drawpanel),
                                               _("<b>Hint:</b>\n"
                                                 "Left mouse key to draw strokes.\n"
                                                 "Holding right mouse key to move the widget.\n"
                                                 ));
 
+*/
+//		gtk_window_set_position(GTK_WINDOW(engine->drawpanel),GTK_WIN_POS_MOUSE);
 
-		gtk_window_set_position(GTK_WINDOW(engine->drawpanel),GTK_WIN_POS_MOUSE);
+//		GtkWidget * vbox = gtk_vbox_new(FALSE,0);
 
-		GtkWidget * vbox = gtk_vbox_new(FALSE,0);
+//		gtk_container_add(GTK_CONTAINER(engine->drawpanel),vbox);
 
-		gtk_container_add(GTK_CONTAINER(engine->drawpanel),vbox);
+//		GtkWidget * drawing_area = gtk_drawing_area_new();
 
-		GtkWidget * drawing_area = gtk_drawing_area_new();
+//		GdkGLConfig * glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_DOUBLE|GDK_GL_MODE_MULTISAMPLE);
 
-		GdkGLConfig * glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_DOUBLE|GDK_GL_MODE_MULTISAMPLE);
-
-		if (gtk_widget_set_gl_capability(drawing_area, glconfig, NULL, FALSE,
-				GDK_GL_RGBA_TYPE))
-		{
+//		if (gtk_widget_set_gl_capability(drawing_area, glconfig, NULL, FALSE,
+//				GDK_GL_RGBA_TYPE))
+/*		{
 			g_signal_connect(G_OBJECT(drawing_area),"configure-event",G_CALLBACK(widget_resize),engine);
 			g_signal_connect(G_OBJECT(drawing_area),"realize",G_CALLBACK(glwidget_realize),engine);
 			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines_gl),engine);		}
@@ -382,8 +340,8 @@ void UI_buildui(IBusHandwriteEngine * engine)
 		g_signal_connect(G_OBJECT(drawing_area),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);
 		g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
 		g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
-	}
-	gtk_widget_show_all(engine->drawpanel);
+	*/}
+	clutter_actor_show_all(engine->drawpanel);
 }
 
 void UI_show_ui(IBusHandwriteEngine * engine)
@@ -393,7 +351,7 @@ void UI_show_ui(IBusHandwriteEngine * engine)
 	printf("%s \n", __func__);
 	if (engine->drawpanel)
 	{
-		gtk_widget_show_all(engine->drawpanel);
+		clutter_actor_show_all(engine->drawpanel);
 	}
 }
 
@@ -401,7 +359,7 @@ void UI_hide_ui(IBusHandwriteEngine * engine)
 {
 	if (engine->drawpanel)
 	{
-		gtk_widget_hide_all(engine->drawpanel);
+		clutter_actor_hide(engine->drawpanel);
 	}
 }
 
@@ -409,14 +367,14 @@ void UI_cancelui(IBusHandwriteEngine* engine)
 {
 	// 撤销绘图窗口，销毁点列表
 	if (engine->drawpanel)
-		gtk_widget_destroy(engine->drawpanel);
+		clutter_actor_destroy(engine->drawpanel);
 	engine->drawpanel = NULL;
 }
 
-static void widget_realize(GtkWidget *widget, gpointer user_data)
+static void widget_realize(ClutterActor *widget, gpointer user_data)
 {
-	GdkPixmap * pxmp;
-	GdkGC * gc;
+	return ;
+#if 0
 	GdkColor black, white;
 	int R = 5;
 	guint	width,height;
@@ -450,8 +408,11 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 
 	g_object_unref(gc);
 
+	clutter_stage_set_user_resizable()
+
 	gtk_widget_reset_shapes(widget);
 	gtk_widget_shape_combine_mask(widget, pxmp, 0, 0);
 	gtk_widget_input_shape_combine_mask(widget, pxmp, 0, 0);
 	g_object_unref(pxmp);
+#endif
 }

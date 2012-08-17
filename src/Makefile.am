@@ -50,7 +50,7 @@ ibus_engine_handwrite_SOURCES =  main.c	\
 				$(NULL)
 
 
-ibus_engine_handwrite_SOURCES +=   UI_gtk.c \
+ibus_engine_handwrite_SOURCES +=   UI_clutter.c \
  					  $(NULL)
 
 if WITH_ZINNIA

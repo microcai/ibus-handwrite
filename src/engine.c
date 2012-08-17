@@ -110,7 +110,7 @@ static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
 	UI_cancelui(engine);
 	// 撤销绘图窗口，销毁点列表
 	if (engine->drawpanel)
-		gtk_widget_destroy(engine->drawpanel);
+		clutter_actor_destroy(engine->drawpanel);
 	engine->drawpanel = NULL;
 	g_free(engine->currentstroke.points);
 	engine->currentstroke.points = NULL;
@@ -184,22 +184,6 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 		handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
 		handwrite->engine->engine = handwrite;
 
-	}else if(g_strcmp0(prop_name,"choose-color")==0)
-	{
-		g_debug("color choose");
-
-		GtkWidget * dialog = gtk_color_selection_dialog_new(prop_name);
-
-
-		GtkWidget * color_sel = gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(dialog));
-
-		gtk_color_selection_set_current_color(GTK_COLOR_SELECTION(color_sel),handwrite->color);
-
-		gtk_dialog_run(GTK_DIALOG(dialog));
-
-		gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(color_sel),handwrite->color);
-
-		gtk_widget_destroy(dialog);
 	}
 }
 
@@ -228,7 +212,7 @@ static gboolean ibus_handwrite_engine_process_key_event(IBusEngine *engine,
 {
 	IBusHandwriteEngine *handwrite = (IBusHandwriteEngine *) engine;
 
-	gtk_widget_queue_draw(handwrite->drawpanel);
+	clutter_actor_queue_redraw(handwrite->drawpanel);
 
 	if (!modifiers)
 		return FALSE;

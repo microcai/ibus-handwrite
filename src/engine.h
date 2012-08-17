@@ -3,7 +3,7 @@
 #define __ENGINE_H__
 
 #include <ibus.h>
-#include <gtk/gtk.h>
+#include <clutter/clutter.h>
 #include "handrecog.h"
 
 #define IBUS_TYPE_HANDWRITE_ENGINE	\
@@ -22,8 +22,8 @@ struct _IBusHandwriteEngine
 	IBusEngine parent;
 	/* members */
 	GType		engine_type;
-	GtkWidget * drawpanel;
-	GtkWidget * lookuppanel;
+	ClutterActor * drawpanel;
+	ClutterActor * lookuppanel;
 	GdkPoint lastpoint;
 	GdkColor color[1]; // color used by pen
 	guint mouse_state;
