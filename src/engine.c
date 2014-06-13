@@ -121,13 +121,14 @@ static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 	UI_show_ui(engine);
 
 	IBusPropList * pl = ibus_prop_list_new();
-
+#if 0
 	IBusProperty * p = ibus_property_new("choose-color", PROP_TYPE_NORMAL,
 			ibus_text_new_from_static_string(_("color")), GTK_STOCK_COLOR_PICKER,
 			ibus_text_new_from_static_string(_("click to set color")), TRUE, TRUE,
 			PROP_STATE_UNCHECKED, NULL);
-
+	TODO color picker for clutter?
 	ibus_prop_list_append(pl, p);
+#endif
 
 #ifdef WITH_ZINNIA
 	if( strcmp(lang,"jp") ==0 || strcmp(lang,"ja"))

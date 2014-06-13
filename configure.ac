@@ -21,9 +21,9 @@
 
 # if not 1, append datestamp to the version number.
 m4_define([package_name], [ibus-handwrite])
-    
+
 AC_PREREQ([2.53])
-AC_INIT([package_name], [2.1.4], [http://code.google.com/p/ibus/issues/entry], [package_name])
+AC_INIT([package_name], [2.1.5], [http://code.google.com/p/ibus/issues/entry], [package_name])
 AM_INIT_AUTOMAKE([-Wall])
 AC_GNU_SOURCE
 
@@ -49,15 +49,15 @@ AC_SUBST(zinnia,"")
 AC_ARG_WITH(zinnia-tomoe,[AC_HELP_STRING([--with-zinnia-tomoe=[[dir]]],[specify the dir that hold zinnia-tomoe data file])],
 	[
 		tomoedir=${withval}
-		
-		rpm_sepc_with_tomoe="--with-zinnia-tomoe=${withval}"		
-		zinnia_tomoe="zinnia-tomoe"	
+
+		rpm_sepc_with_tomoe="--with-zinnia-tomoe=${withval}"
+		zinnia_tomoe="zinnia-tomoe"
 		zinnia="zinnia"
-		
+
 		AC_DEFINE_UNQUOTED(TOMOE_DATA_DIR,"${tomoedir}",[the dir that hold zinnia-tomoe data file])
 	],[
 			AS_IF([test "x${enable_zinnia}" = "xyes"],
-			[AC_MSG_WARN(zinnia engine disabled due to the missing --with-zinnia-tomoe)])	
+			[AC_MSG_WARN(zinnia engine disabled due to the missing --with-zinnia-tomoe)])
 			enable_zinnia=no;
 ])
 
@@ -78,8 +78,11 @@ AS_IF([test "x${enable_zinnia}" = "xyes"],
 AS_IF([test "x${have_zinnia}" = "xyes" ],[
 		AM_CONDITIONAL(WITH_ZINNIA,[true])
 	],[
-		AM_CONDITIONAL(WITH_ZINNIA,[false])		
+		AM_CONDITIONAL(WITH_ZINNIA,[false])
 ])
+
+AC_CHECK_LIB(m, main)
+AC_CHECK_LIB(GL, main)
 
 # check ibus
 PKG_CHECK_MODULES(IBUS, [
@@ -90,15 +93,12 @@ PKG_CHECK_MODULES(CLUTTOR, [
     clutter-1.0 clutter-cogl-1.0
 ])
 
-#PKG_CHECK_MODULES(GTKGL, [
-#    gtkglext-1.0
-#])
-
 PKG_CHECK_MODULES(ALL_NEED, [
-  clutter-1.0 clutter-cogl-1.0  ibus-1.0 >= 1.3 
+  clutter-1.0 clutter-cogl-1.0  ibus-1.0 >= 1.3
 ])
 
-#AC_DEFINE_UNQUOTED(ICONDIR,"${sharedstatedir}/ibus/icons",[icon filedir])
+AC_DEFINE_UNQUOTED(ICONDIR,"${sharedstatedir}/ibus/icons",[icon filedir])
+
 
 AC_CHECK_DECL(MAP_ANONYMOUS,[],
 	[

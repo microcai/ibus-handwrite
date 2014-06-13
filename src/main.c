@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 				exefile, GETTEXT_PACKAGE);
 
 		gchar * iconfile =  g_strdup_printf("%s/ibus-handwrite.svg",icondir);
-		
+
 		desc = ibus_engine_desc_new(engine_name, "handwrite",
 				_("hand write recognizer"), lang, "GPL",
 				MICROCAI_WITHEMAIL, iconfile, "us");

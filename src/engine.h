@@ -24,8 +24,8 @@ struct _IBusHandwriteEngine
 	GType		engine_type;
 	ClutterActor * drawpanel;
 	ClutterActor * lookuppanel;
-	GdkPoint lastpoint;
-	GdkColor color[1]; // color used by pen
+	Point lastpoint;
+	ClutterColor color[1]; // color used by pen
 	guint mouse_state;
 	IbusHandwriteRecog * engine;
 	LineStroke currentstroke;

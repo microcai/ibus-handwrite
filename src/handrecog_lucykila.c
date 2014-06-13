@@ -17,7 +17,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
-#include <gtk/gtk.h>
 
 #include "engine.h"
 #include "handrecog.h"
@@ -121,8 +120,8 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj)
 
 void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 {
-	GdkPoint startpoint;
-	GdkPoint endpoint;
+	Point startpoint;
+	Point endpoint;
 
 	IbusHandwriteRecogLucyKila * me;
 	int i;

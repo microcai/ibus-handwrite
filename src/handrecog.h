@@ -9,17 +9,22 @@
 #define HANDRECOG_C_
 
 #include <glib.h>
-#include <gtk/gtk.h>
+#include <clutter/clutter.h>
+//#include <gtk/gtk.h>
 
 typedef struct _LineStroke LineStroke;
 typedef struct _MatchedChar MatchedChar;
 typedef struct _IbusHandwriteRecog IbusHandwriteRecog;
 typedef struct _IbusHandwriteRecogClass IbusHandwriteRecogClass;
 
+typedef struct Point {
+	int x, y;
+}Point;
+
 struct _LineStroke
 {
 	int		segments; //包含有的段数目
-	GdkPoint* points; //包含的用来构成笔画的点
+	Point* points; //包含的用来构成笔画的点
 };
 
 struct _MatchedChar{

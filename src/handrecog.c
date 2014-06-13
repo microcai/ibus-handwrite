@@ -47,8 +47,8 @@ void ibus_handwrite_recog_append_stroke(IbusHandwriteRecog*obj,LineStroke stroke
 
 	if (stroke.segments)
 	{
-		s.points = g_new(GdkPoint,s.segments);
-		memcpy(s.points, stroke.points, s.segments * sizeof(GdkPoint));
+		s.points = g_new(Point,s.segments);
+		memcpy(s.points, stroke.points, s.segments * sizeof(Point));
 
 		obj->strokes = g_array_append_val(obj->strokes,s);
 

@@ -5,7 +5,8 @@
  *      Author: cai
  */
 
-
+#include <GL/gl.h>
+#include <cogl/cogl.h>
 #include <clutter/clutter.h>
 
 #include "engine.h"
@@ -62,9 +63,10 @@ static gboolean paint_lines_gl(ClutterCanvas *canvas, cairo_t *cr,
 	glFinish();
 }
 
+#if 0
 static gboolean widget_resize(GtkWidget *widget, GdkEventConfigure *event,IBusHandwriteEngine * engine)
 {
-#if 0
+
 	GdkGLDrawable * gldrawable;
 	GdkGLContext  * glcontext;
 
@@ -80,12 +82,14 @@ static gboolean widget_resize(GtkWidget *widget, GdkEventConfigure *event,IBusHa
 	gdk_gl_drawable_gl_end(gldrawable);
 
 	return TRUE;
-#endif
 }
+
+#endif
+
+#if 0
 
 static void glwidget_realize(GtkWidget *widget, gpointer user_data)
 {
-#if 0
 	GdkGLDrawable * gldrawable;
 	GdkGLContext  * glcontext;
 
@@ -99,8 +103,8 @@ static void glwidget_realize(GtkWidget *widget, gpointer user_data)
 		glFinish();
 		gdk_gl_drawable_gl_end(gldrawable);
 	}
-#endif
 }
+#endif
 
 static void regen_loopuptable(ClutterActor * widget, IBusHandwriteEngine * engine)
 {
@@ -140,10 +144,10 @@ static void regen_loopuptable(ClutterActor * widget, IBusHandwriteEngine * engin
 }
 
 
+#if 0
 static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 		gpointer user_data)
 {
-#if 0
 	IBusHandwriteEngine * engine;
 
 	engine = (IBusHandwriteEngine *) (user_data);
@@ -203,10 +207,11 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 	{
 		gtk_window_move(GTK_WINDOW(engine->drawpanel),event->x_root -engine->lastpoint.x,event->y_root - engine->lastpoint.y);
 	}
-#endif
 	return FALSE;
 }
+#endif
 
+#if 0
 static gboolean on_button(ClutterActor* widget, GdkEventButton *event, gpointer user_data)
 {
 	int i;
@@ -261,6 +266,7 @@ static gboolean on_button(ClutterActor* widget, GdkEventButton *event, gpointer 
 	}
 	return TRUE;
 }
+#endif
 
 void UI_buildui(IBusHandwriteEngine * engine)
 {
@@ -287,9 +293,9 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		g_signal_connect(G_OBJECT(drawer),"draw",G_CALLBACK(paint_lines_gl),engine);
 
-		g_signal_connect(G_OBJECT(drawing_area),"motion-event",G_CALLBACK(on_mouse_move),engine);
-		g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
-		g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
+		//g_signal_connect(G_OBJECT(drawing_area),"motion-event",G_CALLBACK(on_mouse_move),engine);
+		//g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
+		//g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
 
 
 		clutter_box_layout_pack(CLUTTER_BOX_LAYOUT(box),
@@ -298,13 +304,12 @@ void UI_buildui(IBusHandwriteEngine * engine)
 		clutter_container_add_actor(CLUTTER_CONTAINER(engine->drawpanel),drawing_area);
 
 
-//		engine->lookuppanel = clutter_table_layout_new();
+		engine->lookuppanel = clutter_table_layout_new();
 
-//		clutter_box_layout_pack(CLUTTER_BOX_LAYOUT(box),				engine->lookuppanel,1,1,1,CLUTTER_BOX_ALIGNMENT_END,CLUTTER_BOX_ALIGNMENT_CENTER);
+		clutter_box_layout_pack(CLUTTER_BOX_LAYOUT(box),
+			engine->lookuppanel,1,1,1,CLUTTER_BOX_ALIGNMENT_END,CLUTTER_BOX_ALIGNMENT_CENTER);
 
-
-//		g_signal_connect(G_OBJECT(engine->drawpanel),"expose-event",G_CALLBACK(paint_lines_gl),engine);		}
-
+		g_signal_connect(G_OBJECT(engine->drawpanel),"expose-event",G_CALLBACK(paint_lines_gl),engine);
 
 /*
                 gtk_widget_set_tooltip_markup(GTK_WIDGET(engine->drawpanel),
@@ -350,13 +355,15 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 
 		g_signal_connect(G_OBJECT(engine->drawpanel),"realize",G_CALLBACK(widget_realize),engine);
-	*/}
+	*/
+
+	}
 	clutter_actor_show_all(engine->drawpanel);
 }
 
 void UI_show_ui(IBusHandwriteEngine * engine)
 {
-	GdkCursor* cursor;
+//	GdkCursor* cursor;
 
 	printf("%s \n", __func__);
 	if (engine->drawpanel)
