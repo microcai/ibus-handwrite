@@ -18,36 +18,20 @@
 
 static void widget_realize(ClutterActor *widget, gpointer user_data);
 
-static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
+static gboolean paint_lines_gl(ClutterCanvas *canvas, cairo_t *cr,
+		gint width, gint height, IBusHandwriteEngine * engine)
 {
-#if 0
-	GdkColormap * cmap;
-	GdkGLDrawable * gldrawable;
-	GdkGLContext  * glcontext;
-	gint			width,height;
+
+	printf("%s called with canvas=%p\n",__func__,canvas);
 
 	LineStroke cl;
 	int i,j;
-
-
-	cmap= gtk_widget_get_colormap(widget);
-	gdk_colormap_alloc_color(cmap,engine->color,FALSE,TRUE);
-
-
-	gldrawable = gtk_widget_get_gl_drawable(widget);
-	glcontext  = gtk_widget_get_gl_context(widget);
-
-	g_assert(gdk_gl_drawable_gl_begin(gldrawable,glcontext));
-
-	gdk_gl_drawable_get_size(gldrawable,&width,&height);
 
 	glClearColor(240,240,230,1);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 	glColor3us(engine->color->red,engine->color->green,engine->color->blue);
-
-	gdk_colormap_free_colors(cmap,engine->color,1);
 
 	//已经录入的笔画
 	for (i = 0; i < engine->engine->strokes->len ; i++ )
@@ -75,14 +59,7 @@ static gboolean paint_lines_gl(GtkWidget *widget, GdkEventExpose *event,IBusHand
 		glEnd();
 	}
 
-
-	if(gdk_gl_drawable_is_double_buffered(gldrawable))
-		gdk_gl_drawable_swap_buffers(gldrawable);
-	else
-		glFinish();
-
-	gdk_gl_drawable_gl_end(gldrawable);
-#endif
+	glFinish();
 }
 
 static gboolean widget_resize(GtkWidget *widget, GdkEventConfigure *event,IBusHandwriteEngine * engine)
@@ -290,7 +267,44 @@ void UI_buildui(IBusHandwriteEngine * engine)
 	//建立绘图窗口, 建立空点
 	if (!engine->drawpanel)
 	{
-		engine->drawpanel = clutter_actor_new();
+		engine->drawpanel = clutter_stage_new();
+		clutter_stage_set_title(CLUTTER_STAGE(engine->drawpanel),"draw here");
+
+		ClutterLayoutManager * box = clutter_box_layout_new();
+		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(box),1);
+
+		clutter_layout_manager_set_container(box,CLUTTER_CONTAINER(engine->drawpanel));
+
+//		clutter_container_add_actor(,box);
+
+		ClutterActor * drawing_area = clutter_actor_new();
+
+		clutter_actor_set_size(drawing_area,400,400);
+
+		ClutterContent * drawer = clutter_canvas_new();
+		clutter_canvas_set_size(CLUTTER_CANVAS(drawer),400,400);
+		clutter_actor_set_content(drawing_area,drawer);
+
+		g_signal_connect(G_OBJECT(drawer),"draw",G_CALLBACK(paint_lines_gl),engine);
+
+		g_signal_connect(G_OBJECT(drawing_area),"motion-event",G_CALLBACK(on_mouse_move),engine);
+		g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
+		g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
+
+
+		clutter_box_layout_pack(CLUTTER_BOX_LAYOUT(box),
+				drawing_area,1,1,1,CLUTTER_BOX_ALIGNMENT_START,CLUTTER_BOX_ALIGNMENT_CENTER);
+
+		clutter_container_add_actor(CLUTTER_CONTAINER(engine->drawpanel),drawing_area);
+
+
+//		engine->lookuppanel = clutter_table_layout_new();
+
+//		clutter_box_layout_pack(CLUTTER_BOX_LAYOUT(box),				engine->lookuppanel,1,1,1,CLUTTER_BOX_ALIGNMENT_END,CLUTTER_BOX_ALIGNMENT_CENTER);
+
+
+//		g_signal_connect(G_OBJECT(engine->drawpanel),"expose-event",G_CALLBACK(paint_lines_gl),engine);		}
+
 
 /*
                 gtk_widget_set_tooltip_markup(GTK_WIDGET(engine->drawpanel),
@@ -315,7 +329,6 @@ void UI_buildui(IBusHandwriteEngine * engine)
 /*		{
 			g_signal_connect(G_OBJECT(drawing_area),"configure-event",G_CALLBACK(widget_resize),engine);
 			g_signal_connect(G_OBJECT(drawing_area),"realize",G_CALLBACK(glwidget_realize),engine);
-			g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines_gl),engine);		}
 		else
 		{
 			//没有 GLX 就使用普通 GDK 绘图
@@ -337,9 +350,6 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 
 		g_signal_connect(G_OBJECT(engine->drawpanel),"realize",G_CALLBACK(widget_realize),engine);
-		g_signal_connect(G_OBJECT(drawing_area),"motion_notify_event",G_CALLBACK(on_mouse_move),engine);
-		g_signal_connect(G_OBJECT(drawing_area),"button-release-event",G_CALLBACK(on_button),engine);
-		g_signal_connect(G_OBJECT(drawing_area),"button-press-event",G_CALLBACK(on_button),engine);
 	*/}
 	clutter_actor_show_all(engine->drawpanel);
 }

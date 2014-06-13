@@ -97,8 +97,6 @@ int main(int argc, char* argv[])
 
 	ibus_bus_request_name(bus, dbus_name, 0);
 
-//	g_free(dbus_name);
-
 	if (!have_ibus)
 	{
 		char * exefile ;
