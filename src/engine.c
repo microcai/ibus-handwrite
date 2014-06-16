@@ -230,11 +230,9 @@ static gboolean ibus_handwrite_engine_process_key_event(IBusEngine *engine,
 
 	gtk_widget_queue_draw(handwrite->drawpanel);
 
-	if (!modifiers)
-		return FALSE;
-
-	if(!handwrite->engine->strokes->len )
-		return FALSE;
+        /* filter out the key release event. */
+	if (modifiers & IBUS_RELEASE_MASK)
+		return TRUE;
 
 	switch (keyval)
 	{
