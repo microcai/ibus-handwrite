@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <ibus.h>
 #include <locale.h>
-#include <gtk/gtkgl.h>
 
 #include <libintl.h>
 #define _(String) gettext (String)
@@ -58,11 +57,6 @@ int main(int argc, char* argv[])
 	if(err)
 	{
 		g_error("git init fail %s",err->message		);
-	}
-
-	if(G_UNLIKELY(!gtk_gl_init_check(&argc, &argv)))
-	{
-		g_warning("GLX extension not available, use slow soft cairo rendering instead");
 	}
 
 #ifdef WITH_ZINNIA

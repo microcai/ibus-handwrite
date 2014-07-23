@@ -35,6 +35,8 @@ AC_PROG_CC
 AC_ISC_POSIX
 AC_HEADER_STDC
 
+AC_CHECK_LIB([m],[atan2])
+
 PKG_PROG_PKG_CONFIG
 
 AC_ARG_WITH(debian,[AC_HELP_STRING([--with-debian],[enable debian specific build])],[],[])
@@ -89,12 +91,8 @@ PKG_CHECK_MODULES(GTK2, [
     gtk+-2.0 >= 2.10
 ])
 
-PKG_CHECK_MODULES(GTKGL, [
-    gtkglext-1.0
-])
-
 PKG_CHECK_MODULES(ALL_NEED, [
-    ibus-1.0 >= 1.2 gtkglext-1.0
+    ibus-1.0 >= 1.2 gtk+-2.0 >= 2.10
 ])
 
 AM_GNU_GETTEXT([external])
