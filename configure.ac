@@ -23,7 +23,7 @@
 m4_define([package_name], [ibus-handwrite])
     
 AC_PREREQ([2.53])
-AC_INIT([package_name], [2.1.4], [http://code.google.com/p/ibus/issues/entry], [package_name])
+AC_INIT([package_name], [2.2.0], [http://code.google.com/p/ibus/issues/entry], [package_name])
 AM_INIT_AUTOMAKE([-Wall])
 AC_GNU_SOURCE
 
@@ -87,12 +87,12 @@ PKG_CHECK_MODULES(IBUS, [
     ibus-1.0 >= 1.3
 ])
 
-PKG_CHECK_MODULES(GTK2, [
-    gtk+-2.0 >= 2.10
+PKG_CHECK_MODULES(GTK3, [
+    gtk+-3.0 >= 3.0
 ])
 
 PKG_CHECK_MODULES(ALL_NEED, [
-    ibus-1.0 >= 1.2 gtk+-2.0 >= 2.10
+    ibus-1.0 >= 1.2 gtk+-3.0 >= 3.0
 ])
 
 AM_GNU_GETTEXT([external])
