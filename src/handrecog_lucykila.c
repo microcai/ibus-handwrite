@@ -16,6 +16,7 @@
 #include <math.h>
 #include <string.h>
 #include <glib.h>
+#include <cairo.h>
 
 #include "engine.h"
 #include "handrecog.h"
@@ -142,7 +143,7 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 	//检测输入的笔画，h ? s ? p? z ? n?
 
 	//有米有折点
-	GdkRectangle ret =
+	cairo_rectangle_int_t rect =
 	{
 			MIN(startpoint.x,endpoint.x), MIN(endpoint.y,startpoint.y),
 			abs(endpoint.x - startpoint.x), abs(endpoint.y - startpoint.y)
@@ -154,10 +155,11 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 		int init=0;
 
 		printf("is z!!!?\n");
-		GdkRegion * rg = gdk_region_rectangle(&ret);
+
+                cairo_region_t * rg = cairo_region_create_rectangle(&rect);
 		for(i=1;i < laststrok.segments -1 ;++i)
 		{
-			if(!gdk_region_point_in(rg,laststrok.points[i].x,laststrok.points[i].y))
+			if(!cairo_region_contains_point(rg,laststrok.points[i].x,laststrok.points[i].y))
 			{
 				init ++;
 			}
@@ -166,11 +168,11 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 			{
 				printf("god z!!!\n");
 				me->input = g_string_append_c(me->input,'z');
-				gdk_region_destroy(rg);
+				cairo_region_destroy(rg);
 				return ;
 			}
 		}
-		gdk_region_destroy(rg);
+		cairo_region_destroy(rg);
 	}
 
 	printf("NO Z!");
