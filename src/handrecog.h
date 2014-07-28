@@ -9,7 +9,6 @@
 #define HANDRECOG_C_
 
 #include <glib.h>
-#include <gdk/gdk.h>
 
 typedef struct _LineStroke LineStroke;
 typedef struct _MatchedChar MatchedChar;

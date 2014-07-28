@@ -6,6 +6,7 @@
 #include <ibus.h>
 #include <locale.h>
 #include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
 #include <libintl.h>
 #define _(String) gettext (String)
@@ -40,7 +41,6 @@ int main(int argc, char* argv[])
 
 
 	setlocale(LC_ALL, "");
-	gtk_set_locale();
 	textdomain(GETTEXT_PACKAGE);
 
 	GOptionEntry args[] =
@@ -141,8 +141,6 @@ int main(int argc, char* argv[])
 
 	GdkScreen * screen = gdk_screen_get_default();
 	GdkVisual * visual = gdk_screen_get_rgba_visual(screen);
-	if(visual)
-            gtk_widget_set_default_visual(visual);
 
 	printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
 

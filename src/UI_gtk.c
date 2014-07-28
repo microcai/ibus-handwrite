@@ -45,7 +45,7 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event, IBusHandwr
 {
 	cairo_t * cr;
 	GdkWindow * window;
-	GtkStyle* style;
+	GtkStyleContext* stylectx;
 
 	LineStroke cl;
 	int i;
@@ -57,13 +57,11 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event, IBusHandwr
 	window = gtk_widget_get_window(widget);
 	cr = gdk_cairo_create(window);
 
-	style = gtk_style_copy(widget->style);
-	style = gtk_style_attach(style,widget->window);
+	/* render frame border */
+	stylectx = gtk_widget_get_style_context(widget);
+	gtk_render_frame(stylectx, cr, 0, 0, WIDTH, HEIGHT);
 
-	gtk_paint_shadow(style,cr,GTK_STATE_ACTIVE,GTK_SHADOW_ETCHED_OUT,widget,NULL,0,0,WIDTH,HEIGHT);
-
-	gtk_style_detach(style);
-
+	/* set line attributes */
 	cairo_set_line_width(cr,3.0);
 	cairo_set_line_cap(cr,CAIRO_LINE_CAP_ROUND);
 	cairo_set_line_join(cr,CAIRO_LINE_JOIN_ROUND);
@@ -304,7 +302,7 @@ void UI_hide_ui(IBusHandwriteEngine * engine)
 {
 	if (engine->drawpanel)
 	{
-		gtk_widget_hide_all(engine->drawpanel);
+		gtk_widget_hide(engine->drawpanel);
 	}
 }
 
@@ -345,7 +343,7 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 	cairo_arc_negative(cr, R, R, R, M_PI, M_PI/2);
 	cairo_line_to(cr, WIDTH - R, 0);
 	cairo_arc_negative(cr, WIDTH - R, R, R, M_PI/2, 0);
-	cario_line_to(cr, WIDTH, HEIGHT - R);
+	cairo_line_to(cr, WIDTH, HEIGHT - R);
 	cairo_arc_negative(cr, WIDTH - R, HEIGHT - R, R, 0, -M_PI/2);
 	cairo_line_to(cr, R, HEIGHT);
 	cairo_arc_negative(cr, R, HEIGHT - R, R, -M_PI/2, -M_PI);
@@ -357,9 +355,9 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 	cairo_destroy(cr);
 	cairo_surface_destroy(surface);
 
-	gtk_widget_reset_shapes(widget);
+	/* gtk_widget_reset_shapes(widget); */
 	gdk_window_shape_combine_region(window, region, 0, 0);
 	gdk_window_input_shape_combine_region(window, region, 0, 0);
 
-	cairo_region_destory(region);
+	cairo_region_destroy(region);
 }
