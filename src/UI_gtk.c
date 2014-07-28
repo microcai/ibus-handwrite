@@ -6,7 +6,10 @@
  */
 
 
+#include <math.h>
 #include <gtk/gtk.h>
+#include <cairo.h>
+#include <gdk/gdk.h>
 
 #include "engine.h"
 #include "UI.h"
@@ -15,14 +18,33 @@
 #define _(String) gettext (String)
 #define N_(String) gettext_noop (String)
 
+#define WIDTH 200
+#define HEIGHT 200
+
+#define MAX_COLOR_VALUE 65535.0
 
 static void widget_realize(GtkWidget *widget, gpointer user_data);
 
-static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwriteEngine * engine)
+static gboolean _draw_lines(cairo_t * cr, LineStroke cl)
 {
-	GdkGC *gc;
+	if (0 == cl.segments)
+		return FALSE;
+
+	int i;
+	for (i = 0; i < cl.segments; ++i) {
+		GdkPoint point = cl.points[i];
+		cairo_line_to(cr, point.x, point.y);
+	}
+
+	cairo_stroke(cr);
+
+	return TRUE;
+}
+
+static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event, IBusHandwriteEngine * engine)
+{
+	cairo_t * cr;
 	GdkWindow * window;
-	GdkColormap * cmap;
 	GtkStyle* style;
 
 	LineStroke cl;
@@ -32,40 +54,35 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event,IBusHandwri
 
 	puts(__func__);
 
+	window = gtk_widget_get_window(widget);
+	cr = gdk_cairo_create(window);
 
 	style = gtk_style_copy(widget->style);
-
 	style = gtk_style_attach(style,widget->window);
 
-	gtk_paint_shadow(style,widget->window,GTK_STATE_ACTIVE,GTK_SHADOW_ETCHED_OUT,NULL,widget,NULL,0,0,200,200);
+	gtk_paint_shadow(style,cr,GTK_STATE_ACTIVE,GTK_SHADOW_ETCHED_OUT,widget,NULL,0,0,WIDTH,HEIGHT);
 
 	gtk_style_detach(style);
 
-	window = widget->window;
+	cairo_set_line_width(cr,3.0);
+	cairo_set_line_cap(cr,CAIRO_LINE_CAP_ROUND);
+	cairo_set_line_join(cr,CAIRO_LINE_JOIN_ROUND);
 
-	cmap= gtk_widget_get_colormap(widget);
-	gdk_colormap_alloc_color(cmap,engine->color,FALSE,TRUE);
-
-	gc = gdk_gc_new(window);
-	gdk_gc_set_line_attributes(gc,3,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-	gdk_gc_set_foreground(gc,engine->color);
+	gdk_cairo_set_source_color (cr, engine->color);
 
 	//已经录入的笔画
-
 	for (i = 0; i < engine->engine->strokes->len ; i++ )
 	{
 		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
 		cl =  g_array_index(engine->engine->strokes,LineStroke,i);
-		gdk_draw_lines(window, gc, cl.points,cl.segments );
+		_draw_lines(cr, cl);
 	}
 	//当下笔画
 	if ( engine->currentstroke.segments && engine->currentstroke.points )
-		gdk_draw_lines(window, gc, engine->currentstroke.points,
-				engine->currentstroke.segments);
+		_draw_lines(cr, engine->currentstroke);
 
-	g_object_unref(gc);
+	cairo_destroy(cr);
 
-	gdk_colormap_free_colors(cmap,engine->color,1);
 	return TRUE;
 }
 
@@ -115,6 +132,8 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 
 	guint width,height;
 
+	GdkWindow * window;
+
 	gtk_window_get_size(GTK_WINDOW(engine->drawpanel),&width,&height);
 
 
@@ -126,11 +145,13 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 	if(event->state & GDK_BUTTON2_MASK )
 		ct = GDK_BOTTOM_RIGHT_CORNER;
 
-	gdk_window_set_cursor(widget->window,gdk_cursor_new(ct));
+	window = gtk_widget_get_window(widget);
+
+	gdk_window_set_cursor(window,gdk_cursor_new(ct));
 
 	if (engine->mouse_state == GDK_BUTTON_PRESS) // 鼠标按下状态
 	{
-		gdk_window_set_cursor(widget->window,gdk_cursor_new(ct));
+		gdk_window_set_cursor(window,gdk_cursor_new(ct));
 
 		engine->currentstroke.points
 				= g_renew(GdkPoint,engine->currentstroke.points,engine->currentstroke.segments +1  );
@@ -250,12 +271,12 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		gtk_box_pack_start(GTK_BOX(vbox),drawing_area,TRUE,TRUE,FALSE);
 
-		gtk_widget_set_size_request(drawing_area,200,200);
+		gtk_widget_set_size_request(drawing_area,WIDTH,HEIGHT);
 
 		engine->lookuppanel = gtk_table_new(2,5,TRUE);
 
 		gtk_box_pack_end(GTK_BOX(vbox),engine->lookuppanel,FALSE,TRUE,FALSE);
-		gtk_widget_set_size_request(engine->lookuppanel,200,50);
+		gtk_widget_set_size_request(engine->lookuppanel,WIDTH,50);
 
 		gtk_widget_add_events(GTK_WIDGET(drawing_area),GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK| GDK_BUTTON_PRESS_MASK);
 
@@ -297,43 +318,48 @@ void UI_cancelui(IBusHandwriteEngine* engine)
 
 static void widget_realize(GtkWidget *widget, gpointer user_data)
 {
-	GdkPixmap * pxmp;
-	GdkGC * gc;
-	GdkColor black, white;
-	int R = 5;
-	guint	width,height;
+	cairo_t * cr;
+	cairo_surface_t * surface;
+	cairo_region_t * region;
+	GdkWindow * window;
+	const int R = 5;
+	guint width,height;
 
-	//二值图像，白就是 1
-	white.pixel = 1;
-	black.pixel = 0;
+	window = gtk_widget_get_window(widget);
 
-	gtk_window_set_opacity(GTK_WINDOW(widget), 0.62);
+	gtk_widget_set_opacity(widget, 0.62);
 
 	gtk_window_get_size(GTK_WINDOW(widget),&width,&height);
 
-	pxmp = gdk_pixmap_new(NULL, width, height, 1);
-	gc = gdk_gc_new(GDK_DRAWABLE(pxmp));
+	surface = gdk_window_create_similar_surface
+	    (window, CAIRO_CONTENT_ALPHA, width, height);
+	cr = cairo_create(surface);
 
-	gdk_gc_set_foreground(gc, &black);
+	cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+	cairo_rectangle(cr, 0, 0, WIDTH, HEIGHT);
+	cairo_fill(cr);
 
-	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, width, height);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.0);
 
-	gdk_gc_set_foreground(gc, &white);
+	cairo_move_to(cr, 0, R);
+	cairo_arc_negative(cr, R, R, R, M_PI, M_PI/2);
+	cairo_line_to(cr, WIDTH - R, 0);
+	cairo_arc_negative(cr, WIDTH - R, R, R, M_PI/2, 0);
+	cario_line_to(cr, WIDTH, HEIGHT - R);
+	cairo_arc_negative(cr, WIDTH - R, HEIGHT - R, R, 0, -M_PI/2);
+	cairo_line_to(cr, R, HEIGHT);
+	cairo_arc_negative(cr, R, HEIGHT - R, R, -M_PI/2, -M_PI);
+	cairo_close_path(cr);
+	cairo_fill(cr);
 
-	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, 0, R*2, R*2, 0, 360 * 64);
-	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, width - R*2, 0, R*2, R*2, 0, 360
-			* 64);
-	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, width - R*2, height - R*2, R*2, R*2, 0,
-			360 * 64);
-	gdk_draw_arc(GDK_DRAWABLE(pxmp), gc, 1, 0, height - R*2, R*2, R*2, 0, 360
-			* 64);
-	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, 0, R, width, height - R*2);
-	gdk_draw_rectangle(GDK_DRAWABLE(pxmp), gc, 1, R, 0, width - R*2, height);
+	region = gdk_cairo_region_create_from_surface(surface);
 
-	g_object_unref(gc);
+	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
 
 	gtk_widget_reset_shapes(widget);
-	gtk_widget_shape_combine_mask(widget, pxmp, 0, 0);
-	gtk_widget_input_shape_combine_mask(widget, pxmp, 0, 0);
-	g_object_unref(pxmp);
+	gdk_window_shape_combine_region(window, region, 0, 0);
+	gdk_window_input_shape_combine_region(window, region, 0, 0);
+
+	cairo_region_destory(region);
 }
