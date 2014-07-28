@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ibus.h>
 #include <locale.h>
+#include <gdk/gdk.h>
 
 #include <libintl.h>
 #define _(String) gettext (String)
@@ -139,8 +140,9 @@ int main(int argc, char* argv[])
 	g_object_unref(component);
 
 	GdkScreen * screen = gdk_screen_get_default();
-	GdkColormap * map = gdk_screen_get_rgba_colormap(screen);
-	if(map)	gtk_widget_set_default_colormap(map);
+	GdkVisual * visual = gdk_screen_get_rgba_visual(screen);
+	if(visual)
+            gtk_widget_set_default_visual(visual);
 
 	printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
 
