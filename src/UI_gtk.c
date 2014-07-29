@@ -18,21 +18,20 @@
 #define _(String) gettext (String)
 #define N_(String) gettext_noop (String)
 
-#define WIDTH 200
-#define HEIGHT 200
-
-#define MAX_COLOR_VALUE 65535.0
+#define WIDTH 260
+#define HEIGHT 260
+#define PANELHEIGHT 60
 
 static void widget_realize(GtkWidget *widget, gpointer user_data);
 
-static gboolean _draw_lines(cairo_t * cr, LineStroke cl)
+static gboolean _draw_lines(cairo_t * cr, LineStroke * cl)
 {
-	if (0 == cl.segments)
+	if (0 == cl->segments)
 		return FALSE;
 
 	int i;
-	for (i = 0; i < cl.segments; ++i) {
-		GdkPoint point = cl.points[i];
+	for (i = 0; i < cl->segments; ++i) {
+		GdkPoint point = cl->points[i];
 		cairo_line_to(cr, point.x, point.y);
 	}
 
@@ -41,21 +40,14 @@ static gboolean _draw_lines(cairo_t * cr, LineStroke cl)
 	return TRUE;
 }
 
-static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event, IBusHandwriteEngine * engine)
+static gboolean paint_lines(GtkWidget *widget, cairo_t * cr, IBusHandwriteEngine * engine)
 {
-	cairo_t * cr;
-	GdkWindow * window;
 	GtkStyleContext* stylectx;
 
 	LineStroke cl;
 	int i;
 
-	MatchedChar * matched;
-
 	puts(__func__);
-
-	window = gtk_widget_get_window(widget);
-	cr = gdk_cairo_create(window);
 
 	/* render frame border */
 	stylectx = gtk_widget_get_style_context(widget);
@@ -73,13 +65,11 @@ static gboolean paint_lines(GtkWidget *widget, GdkEventExpose *event, IBusHandwr
 	{
 		printf("drawing %d th line, total %d\n",i,engine->engine->strokes->len);
 		cl =  g_array_index(engine->engine->strokes,LineStroke,i);
-		_draw_lines(cr, cl);
+		_draw_lines(cr, &cl);
 	}
 	//当下笔画
 	if ( engine->currentstroke.segments && engine->currentstroke.points )
-		_draw_lines(cr, engine->currentstroke);
-
-	cairo_destroy(cr);
+		_draw_lines(cr, &(engine->currentstroke));
 
 	return TRUE;
 }
@@ -102,7 +92,9 @@ static void regen_loopuptable(GtkWidget * widget, IBusHandwriteEngine * engine)
 
 		bt = gtk_button_new_with_label(drawtext);
 
-		gtk_table_attach_defaults(GTK_TABLE(widget),bt,i%5,i%5+1,i/5,i/5+1);
+		g_object_set(G_OBJECT(bt), "expand", TRUE, NULL);
+
+		gtk_grid_attach(GTK_TABLE(widget), bt, i%5, i/5, 1, 1);
 
 		gtk_widget_show(bt);
 
@@ -128,14 +120,13 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 
 	GdkCursorType ct ;
 
-	guint width,height;
+	gint width,height;
 
 	GdkWindow * window;
 
 	gtk_window_get_size(GTK_WINDOW(engine->drawpanel),&width,&height);
 
-
-	ct = event->y < (height-50) ?  GDK_PENCIL:GDK_CENTER_PTR;
+	ct = event->y < (height - PANELHEIGHT) ?  GDK_PENCIL:GDK_CENTER_PTR;
 
 	if( event->state & (GDK_BUTTON2_MASK |GDK_BUTTON3_MASK ))
 		ct = GDK_FLEUR;
@@ -162,9 +153,6 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 		printf("move, x= %lf, Y=%lf, segments = %d \n",event->x,event->y,engine->currentstroke.segments);
 
 		gtk_widget_queue_draw(widget);
-	    while (gtk_events_pending ())
-	        gtk_main_iteration ();
-
 	}
 	else if(event->state & GDK_BUTTON2_MASK)
 	{
@@ -190,7 +178,6 @@ static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
 
 static gboolean on_button(GtkWidget* widget, GdkEventButton *event, gpointer user_data)
 {
-	int i;
 	IBusHandwriteEngine * engine;
 
 	engine = (IBusHandwriteEngine *) (user_data);
@@ -259,22 +246,23 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		gtk_window_set_position(GTK_WINDOW(engine->drawpanel),GTK_WIN_POS_MOUSE);
 
-		GtkWidget * vbox = gtk_vbox_new(FALSE,0);
+		GtkWidget * vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+		gtk_box_set_homogeneous(vbox, FALSE);
 
 		gtk_container_add(GTK_CONTAINER(engine->drawpanel),vbox);
 
 		GtkWidget * drawing_area = gtk_drawing_area_new();
 
-                g_signal_connect(G_OBJECT(drawing_area),"expose-event",G_CALLBACK(paint_lines),engine);
+                g_signal_connect(G_OBJECT(drawing_area),"draw",G_CALLBACK(paint_lines),engine);
 
 		gtk_box_pack_start(GTK_BOX(vbox),drawing_area,TRUE,TRUE,FALSE);
 
-		gtk_widget_set_size_request(drawing_area,WIDTH,HEIGHT);
+		gtk_widget_set_size_request(drawing_area, WIDTH, HEIGHT - PANELHEIGHT);
 
-		engine->lookuppanel = gtk_table_new(2,5,TRUE);
+		engine->lookuppanel = gtk_grid_new();
 
 		gtk_box_pack_end(GTK_BOX(vbox),engine->lookuppanel,FALSE,TRUE,FALSE);
-		gtk_widget_set_size_request(engine->lookuppanel,WIDTH,50);
+		gtk_widget_set_size_request(engine->lookuppanel, WIDTH, PANELHEIGHT);
 
 		gtk_widget_add_events(GTK_WIDGET(drawing_area),GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK| GDK_BUTTON_PRESS_MASK);
 
@@ -289,8 +277,6 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 void UI_show_ui(IBusHandwriteEngine * engine)
 {
-	GdkCursor* cursor;
-
 	printf("%s \n", __func__);
 	if (engine->drawpanel)
 	{
@@ -321,7 +307,7 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 	cairo_region_t * region;
 	GdkWindow * window;
 	const int R = 5;
-	guint width,height;
+	gint width,height;
 
 	window = gtk_widget_get_window(widget);
 
@@ -334,19 +320,15 @@ static void widget_realize(GtkWidget *widget, gpointer user_data)
 	cr = cairo_create(surface);
 
 	cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-	cairo_rectangle(cr, 0, 0, WIDTH, HEIGHT);
-	cairo_fill(cr);
-
-	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.0);
 
 	cairo_move_to(cr, 0, R);
-	cairo_arc_negative(cr, R, R, R, M_PI, M_PI/2);
+	cairo_arc(cr, R, R, R, M_PI, -M_PI/2);
 	cairo_line_to(cr, WIDTH - R, 0);
-	cairo_arc_negative(cr, WIDTH - R, R, R, M_PI/2, 0);
+	cairo_arc(cr, WIDTH - R, R, R, -M_PI/2, 0);
 	cairo_line_to(cr, WIDTH, HEIGHT - R);
-	cairo_arc_negative(cr, WIDTH - R, HEIGHT - R, R, 0, -M_PI/2);
+	cairo_arc(cr, WIDTH - R, HEIGHT - R, R, 0, M_PI/2);
 	cairo_line_to(cr, R, HEIGHT);
-	cairo_arc_negative(cr, R, HEIGHT - R, R, -M_PI/2, -M_PI);
+	cairo_arc(cr, R, HEIGHT - R, R, M_PI/2, M_PI);
 	cairo_close_path(cr);
 	cairo_fill(cr);
 
