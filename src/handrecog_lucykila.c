@@ -15,7 +15,6 @@
 #include <sys/mman.h>
 #include <math.h>
 #include <string.h>
-#include <stdlib.h>
 #include <glib.h>
 
 #include "engine.h"
@@ -120,8 +119,8 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj)
 
 void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 {
-	Point startpoint;
-	Point endpoint;
+	GdkPoint startpoint;
+	GdkPoint endpoint;
 
 	IbusHandwriteRecogLucyKila * me;
 	int i;
@@ -143,10 +142,10 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 	//检测输入的笔画，h ? s ? p? z ? n?
 
 	//有米有折点
-	cairo_rectangle_int_t ret =
+	GdkRectangle ret =
 	{
 			MIN(startpoint.x,endpoint.x), MIN(endpoint.y,startpoint.y),
-			fabs(endpoint.x - startpoint.x), fabs(endpoint.y - startpoint.y)
+			abs(endpoint.x - startpoint.x), abs(endpoint.y - startpoint.y)
 	};
 
 
@@ -155,10 +154,10 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 		int init=0;
 
 		printf("is z!!!?\n");
-		cairo_region_t * rg = cairo_region_create_rectangle(&ret);
+		GdkRegion * rg = gdk_region_rectangle(&ret);
 		for(i=1;i < laststrok.segments -1 ;++i)
 		{
-			if(!cairo_region_contains_point(rg,laststrok.points[i].x,laststrok.points[i].y))
+			if(!gdk_region_point_in(rg,laststrok.points[i].x,laststrok.points[i].y))
 			{
 				init ++;
 			}
@@ -167,11 +166,11 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 			{
 				printf("god z!!!\n");
 				me->input = g_string_append_c(me->input,'z');
-				cairo_region_destroy(rg);
+				gdk_region_destroy(rg);
 				return ;
 			}
 		}
-		cairo_region_destroy(rg);
+		gdk_region_destroy(rg);
 	}
 
 	printf("NO Z!");

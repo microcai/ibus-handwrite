@@ -24,7 +24,7 @@ test: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
 		--icondir $(top_srcdir)/icons/ \
 		--table $(top_srcdir)/data/table.txt \
-		--locale /tmp/${prefix}/share/locale/
+		--locale /tmp/${prefix}/share/locale/ 
 if WITH_ZINNIA		
 test-jp: ibus-engine-handwrite
 	$(builddir)/ibus-engine-handwrite \
@@ -50,7 +50,7 @@ ibus_engine_handwrite_SOURCES =  main.c	\
 				$(NULL)
 
 
-ibus_engine_handwrite_SOURCES +=   UI_clutter.c \
+ibus_engine_handwrite_SOURCES +=   UI_gtk.c \
  					  $(NULL)
 
 if WITH_ZINNIA

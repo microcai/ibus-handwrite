@@ -23,6 +23,7 @@
 SUBDIRS = \
 	src \
 	icons \
+	po \
 	data \
 	doc \
 	$(NULL)
