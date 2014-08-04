@@ -15,8 +15,8 @@
 #include <sys/mman.h>
 #include <math.h>
 #include <string.h>
-#include <stdlib.h>
 #include <glib.h>
+#include <cairo.h>
 
 #include "engine.h"
 #include "handrecog.h"
@@ -120,8 +120,8 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj)
 
 void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 {
-	Point startpoint;
-	Point endpoint;
+	GdkPoint startpoint;
+	GdkPoint endpoint;
 
 	IbusHandwriteRecogLucyKila * me;
 	int i;
@@ -143,10 +143,10 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 	//检测输入的笔画，h ? s ? p? z ? n?
 
 	//有米有折点
-	cairo_rectangle_int_t ret =
+	cairo_rectangle_int_t rect =
 	{
 			MIN(startpoint.x,endpoint.x), MIN(endpoint.y,startpoint.y),
-			fabs(endpoint.x - startpoint.x), fabs(endpoint.y - startpoint.y)
+			abs(endpoint.x - startpoint.x), abs(endpoint.y - startpoint.y)
 	};
 
 
@@ -155,7 +155,8 @@ void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 		int init=0;
 
 		printf("is z!!!?\n");
-		cairo_region_t * rg = cairo_region_create_rectangle(&ret);
+
+                cairo_region_t * rg = cairo_region_create_rectangle(&rect);
 		for(i=1;i < laststrok.segments -1 ;++i)
 		{
 			if(!cairo_region_contains_point(rg,laststrok.points[i].x,laststrok.points[i].y))

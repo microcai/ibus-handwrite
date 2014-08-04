@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <ibus.h>
 #include <locale.h>
-#include <clutter/clutter.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
 #include <libintl.h>
 #define _(String) gettext (String)
@@ -40,7 +41,6 @@ int main(int argc, char* argv[])
 
 
 	setlocale(LC_ALL, "");
-
 	textdomain(GETTEXT_PACKAGE);
 
 	GOptionEntry args[] =
@@ -53,18 +53,13 @@ int main(int argc, char* argv[])
 			{0}
 	};
 
-	clutter_init_with_args(&argc,&argv,PACKAGE_NAME,args,PACKAGE_NAME,&err);
+	gtk_init_with_args(&argc,&argv,PACKAGE_NAME,args,PACKAGE_NAME,&err);
 
 	if(err)
 	{
-		g_error("clutter init fail %s",err->message		);
+		g_error("git init fail %s",err->message		);
 	}
-/*
-	if(G_UNLIKELY(!gtk_gl_init_check(&argc, &argv)))
-	{
-		g_warning("GLX extension not available, use slow soft cairo rendering instead");
-	}
-*/
+
 #ifdef WITH_ZINNIA
 	if(strcmp(language,"zh")==0 ||strcmp(language,"zh_CN") ==0 )
 	{
@@ -79,6 +74,11 @@ int main(int argc, char* argv[])
 
 #endif
 
+	if(locale_dir)
+	{
+		bindtextdomain(GETTEXT_PACKAGE,locale_dir);
+	}
+
 	gchar * engine_name = g_strdup_printf("handwrite-%s",lang);
 
 	gchar * dbus_name = g_strdup_printf("org.freedesktop.IBus.handwrite-%s",lang);
@@ -90,12 +90,14 @@ int main(int argc, char* argv[])
 
 	bus = ibus_bus_new();
 
-	g_signal_connect (bus, "disconnected", G_CALLBACK (clutter_main_quit), NULL);
+	g_signal_connect (bus, "disconnected", G_CALLBACK (gtk_main_quit), NULL);
 
 	factory = ibus_factory_new(ibus_bus_get_connection(bus));
 
 
 	ibus_bus_request_name(bus, dbus_name, 0);
+
+//	g_free(dbus_name);
 
 	if (!have_ibus)
 	{
@@ -108,7 +110,7 @@ int main(int argc, char* argv[])
 				exefile, GETTEXT_PACKAGE);
 
 		gchar * iconfile =  g_strdup_printf("%s/ibus-handwrite.svg",icondir);
-
+		
 		desc = ibus_engine_desc_new(engine_name, "handwrite",
 				_("hand write recognizer"), lang, "GPL",
 				MICROCAI_WITHEMAIL, iconfile, "us");
@@ -137,12 +139,11 @@ int main(int argc, char* argv[])
 
 	g_object_unref(component);
 
-//	GdkScreen * screen = gdk_screen_get_default();
-//	GdkColormap * map = gdk_screen_get_rgba_colormap(screen);
-//	if(map)	gtk_widget_set_default_colormap(map);
+	GdkScreen * screen = gdk_screen_get_default();
+	GdkVisual * visual = gdk_screen_get_rgba_visual(screen);
 
 	printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
 
-	ibus_main();
+	gtk_main();
 	return 0;
 }
