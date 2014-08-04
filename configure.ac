@@ -23,7 +23,7 @@
 m4_define([package_name], [ibus-handwrite])
     
 AC_PREREQ([2.53])
-AC_INIT([package_name], [2.2.0], [http://code.google.com/p/ibus/issues/entry], [package_name])
+AC_INIT([package_name], [3.0.0], [http://code.google.com/p/ibus/issues/entry], [package_name])
 AM_INIT_AUTOMAKE([-Wall])
 AC_GNU_SOURCE
 
