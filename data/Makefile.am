@@ -18,10 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-EXTRA_DIST = table.txt
+EXTRA_DIST   = table.txt handwrite-jp.appdata.xml handwrite-zh.appdata.xml
 
-modelsdir = $(pkgdatadir)/data
+modelsdir    = $(pkgdatadir)/data
 
-models_DATA = table.txt
+models_DATA  = table.txt
 
-			
+appdatadir   = @datadir@/appdata
+
+appdata_DATA = handwrite-jp.appdata.xml handwrite-zh.appdata.xml
