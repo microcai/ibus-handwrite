@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="inputmethod">
+  <id>handwrite-jp.xml</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <name>Japanese Handwriting</name>
+  <summary>Japanese handwriting input method</summary>
+  <description>
+    <p>
+      The handwriting input method is designed for entering Japanese text.
+    </p>
+    <p>
+      Input methods are typing systems allowing users to input complex languages.
+      They are necessary because these contain too many characters to simply be laid
+      out on a traditional keyboard.
+    </p>
+  </description>
+  <url type="homepage">http://code.google.com/p/ibus-handwrite/</url>
+  <url type="bugtracker">https://code.google.com/p/ibus/issues/list</url>
+  <url type="help">https://code.google.com/p/ibus/wiki/FAQ</url>
+  <update_contact><!-- upstream-contact_at_email.com --></update_contact>
+</component>
