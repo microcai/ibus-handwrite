@@ -155,9 +155,7 @@ static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 
 static void ibus_handwrite_engine_focus_out(IBusHandwriteEngine *engine)
 {
-	UI_hide_ui(engine);
 	printf("%s \n", __func__);
-
 }
 
 static void ibus_handwrite_engine_reset(IBusHandwriteEngine *engine)
