@@ -89,6 +89,7 @@ static void ibus_handwrite_engine_init(IBusHandwriteEngine *handwrite)
 #endif
 
 	handwrite->engine = ibus_handwrite_recog_new(handwrite->engine_type);
+	handwrite->color[0].alpha = 1.0;
 	handwrite->engine->engine = handwrite;
 }
 
@@ -186,16 +187,13 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 	{
 		g_debug("color choose");
 
-		GtkWidget * dialog = gtk_color_selection_dialog_new(prop_name);
+		GtkWidget * dialog = gtk_color_chooser_dialog_new(prop_name, NULL);
 
-
-		GtkWidget * color_sel = gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(dialog));
-
-		gtk_color_selection_set_current_color(GTK_COLOR_SELECTION(color_sel),handwrite->color);
+		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog),handwrite->color);
 
 		gtk_dialog_run(GTK_DIALOG(dialog));
 
-		gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(color_sel),handwrite->color);
+		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(dialog),handwrite->color);
 
 		gtk_widget_destroy(dialog);
 	}
