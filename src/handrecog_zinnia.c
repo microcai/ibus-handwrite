@@ -74,7 +74,7 @@ static gboolean ibus_handwrite_recog_zinnia_domatch(IbusHandwriteRecog*obj,int w
 
 	LineStroke cl;
 
-	guint width,height;
+	gint width,height;
 
 	obj->matched = g_array_set_size(obj->matched,0);
 

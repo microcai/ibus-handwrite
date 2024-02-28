@@ -58,7 +58,7 @@ static gboolean paint_lines(GtkWidget *widget, cairo_t * cr, IBusHandwriteEngine
 	cairo_set_line_cap(cr,CAIRO_LINE_CAP_ROUND);
 	cairo_set_line_join(cr,CAIRO_LINE_JOIN_ROUND);
 
-	gdk_cairo_set_source_color (cr, engine->color);
+	gdk_cairo_set_source_rgba (cr, engine->color);
 
 	//已经录入的笔画
 	for (i = 0; i < engine->engine->strokes->len ; i++ )
@@ -94,7 +94,7 @@ static void regen_loopuptable(GtkWidget * widget, IBusHandwriteEngine * engine)
 
 		g_object_set(G_OBJECT(bt), "expand", TRUE, NULL);
 
-		gtk_grid_attach(GTK_TABLE(widget), bt, i%5, i/5, 1, 1);
+		gtk_grid_attach(GTK_GRID(widget), bt, i%5, i/5, 1, 1);
 
 		gtk_widget_show(bt);
 
@@ -247,7 +247,7 @@ void UI_buildui(IBusHandwriteEngine * engine)
 		gtk_window_set_position(GTK_WINDOW(engine->drawpanel),GTK_WIN_POS_MOUSE);
 
 		GtkWidget * vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_box_set_homogeneous(vbox, FALSE);
+		gtk_box_set_homogeneous(GTK_BOX(vbox), FALSE);
 
 		gtk_container_add(GTK_CONTAINER(engine->drawpanel),vbox);
 
