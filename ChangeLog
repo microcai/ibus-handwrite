@@ -1,3 +1,6 @@
+Author: joshua <auhsoj05@gmail.com>
+Date: Friday, April 3, 2026 9:43 AM
+    bugfix: fix bug where release events would not be sent.
 
 Author: microcai <microcai@fedoraproject.org>
 Date:   Tue May 11 17:20:41 2010 +0800

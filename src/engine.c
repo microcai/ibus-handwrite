@@ -227,8 +227,8 @@ static gboolean ibus_handwrite_engine_process_key_event(IBusEngine *engine,
 	gtk_widget_queue_draw(handwrite->drawpanel);
 
         /* filter out the key release event. */
-	if (modifiers & IBUS_RELEASE_MASK)
-		return TRUE;
+	if(!(modifiers&(~IBUS_MODIFIER_MASK))){
+	if (modifiers^IBUS_RELEASE_MASK){
 
 	switch (keyval)
 	{
@@ -253,6 +253,9 @@ static gboolean ibus_handwrite_engine_process_key_event(IBusEngine *engine,
 	case IBUS_Escape:
 		ibus_handwrite_recog_clear_stroke(handwrite->engine);
 		return TRUE;
+	}
+	}
+
 	}
 	return FALSE;
 }

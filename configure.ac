@@ -22,32 +22,40 @@
 # if not 1, append datestamp to the version number.
 m4_define([package_name], [ibus-handwrite])
     
-AC_PREREQ([2.53])
-AC_INIT([package_name], [3.0.0], [http://code.google.com/p/ibus/issues/entry], [package_name])
+AC_PREREQ([2.72])
+AC_INIT([package_name],[3.0.0],[http://code.google.com/p/ibus/issues/entry],[package_name])
 AM_INIT_AUTOMAKE([-Wall])
-AC_GNU_SOURCE
+AC_USE_SYSTEM_EXTENSIONS
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # define PACKAGE_VERSION_* variables
 AC_PROG_CC
-AC_ISC_POSIX
-AC_HEADER_STDC
+AC_SEARCH_LIBS([strerror],[cposix])
+m4_warn([obsolete],
+[The preprocessor macro 'STDC_HEADERS' is obsolete.
+  Except in unusual embedded environments, you can safely include all
+  C89 headers unconditionally.])dnl
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 
 AC_CHECK_LIB([m],[atan2])
 
 PKG_PROG_PKG_CONFIG
 
-AC_ARG_WITH(debian,[AC_HELP_STRING([--with-debian],[enable debian specific build])],[],[])
+AC_ARG_WITH(debian,[AS_HELP_STRING([--with-debian],[enable debian specific build])],[],[])
 
-AC_ARG_ENABLE(zinnia,AC_HELP_STRING([--enable-zinnia],[build with zinnia engine]),[],[enable_zinnia=yes])
+AC_ARG_ENABLE(zinnia,AS_HELP_STRING([--enable-zinnia],[build with zinnia engine]),[],[enable_zinnia=yes])
 
 AC_SUBST(rpm_sepc_with_tomoe,"")
 AC_SUBST(zinnia_tomoe,"")
 AC_SUBST(zinnia,"")
 
-AC_ARG_WITH(zinnia-tomoe,[AC_HELP_STRING([--with-zinnia-tomoe=[[dir]]],[specify the dir that hold zinnia-tomoe data file])],
+AC_ARG_WITH(zinnia-tomoe,[AS_HELP_STRING([--with-zinnia-tomoe=[[dir]]],[specify the dir that hold zinnia-tomoe data file])],
 	[
 		tomoedir=${withval}
 		
