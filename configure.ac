@@ -95,12 +95,12 @@ PKG_CHECK_MODULES(IBUS, [
     ibus-1.0 >= 1.3
 ])
 
-PKG_CHECK_MODULES(GTK3, [
-    gtk+-3.0 >= 3.0
+PKG_CHECK_MODULES(GTK4, [
+    gtk4 >= 4.0
 ])
 
 PKG_CHECK_MODULES(ALL_NEED, [
-    ibus-1.0 >= 1.2 gtk+-3.0 >= 3.0
+    ibus-1.0 >= 1.2 gtk4 >= 4.0
 ])
 
 AM_GNU_GETTEXT([external])

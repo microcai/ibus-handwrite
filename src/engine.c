@@ -104,6 +104,7 @@ static void ibus_handwrite_engine_enable(IBusHandwriteEngine *engine)
 {
 
 	UI_buildui(engine);
+
 }
 
 static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
@@ -111,7 +112,7 @@ static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
 	UI_cancelui(engine);
 	// 撤销绘图窗口，销毁点列表
 	if (engine->drawpanel)
-		gtk_widget_destroy(engine->drawpanel);
+		gtk_window_destroy(GTK_WINDOW(engine->drawpanel));
 	engine->drawpanel = NULL;
 	g_free(engine->currentstroke.points);
 	engine->currentstroke.points = NULL;
@@ -120,11 +121,12 @@ static void ibus_handwrite_engine_disable(IBusHandwriteEngine *engine)
 static void ibus_handwrite_engine_focus_in(IBusHandwriteEngine *engine)
 {
 	UI_show_ui(engine);
+		//gtk_dialog_run(GTK_DIALOG(dialog));
 
 	IBusPropList * pl = ibus_prop_list_new();
 
 	IBusProperty * p = ibus_property_new("choose-color", PROP_TYPE_NORMAL,
-			ibus_text_new_from_static_string(_("color")), GTK_STOCK_COLOR_PICKER,
+			ibus_text_new_from_static_string(_("color")), "color-picker",
 			ibus_text_new_from_static_string(_("click to set color")), TRUE, TRUE,
 			PROP_STATE_UNCHECKED, NULL);
 
@@ -165,6 +167,25 @@ static void ibus_handwrite_engine_reset(IBusHandwriteEngine *engine)
 //	ibus_handwrite_engine_disable(engine);
 }
 
+static void on_color_chosen(GObject* source_object, GAsyncResult* res, gpointer data){
+    GtkColorDialog *dialog = GTK_COLOR_DIALOG(source_object);
+
+    GError *error = NULL;
+
+    GdkRGBA *color = gtk_color_dialog_choose_rgba_finish(dialog,res,&error);
+
+    if(error != NULL){
+        g_print("Color selection failed or was cancelled: %s\n", error->message);
+        g_clear_error(&error);
+        return;
+    }
+
+    if (color != NULL) {
+        
+
+    }
+}
+
 void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name, guint prop_state)
 {
 	IBusHandwriteEngine *  handwrite = IBUS_HANDWRITE_ENGINE(engine);
@@ -187,15 +208,15 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 	{
 		g_debug("color choose");
 
-		GtkWidget * dialog = gtk_color_chooser_dialog_new(prop_name, NULL);
+		GtkColorDialog * dialog = gtk_color_dialog_new();
 
-		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog),handwrite->color);
+		gtk_color_dialog_choose_rgba(GTK_COLOR_DIALOG(dialog),NULL, //window
+                handwrite->color,
+                NULL,on_color_chosen,NULL //GCancellable, GAsyncREadyCallback, gpointer
+                );
+    
+        gtk_widget_set_visible(GTK_WIDGET(dialog),TRUE);
 
-		gtk_dialog_run(GTK_DIALOG(dialog));
-
-		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(dialog),handwrite->color);
-
-		gtk_widget_destroy(dialog);
 	}
 }
 
