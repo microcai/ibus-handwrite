@@ -20,9 +20,12 @@
 IBusBus *bus = NULL;
 static IBusFactory *factory = NULL;
 
+static gboolean running = FALSE;
+
 char *tablefile=  TABLEFILE ;
 char icondir[4096]= PKGDATADIR"/icons";
 char lang[20]	= "zh_CN";
+
 
 int main(int argc, char* argv[])
 {
@@ -53,7 +56,8 @@ int main(int argc, char* argv[])
 			{0}
 	};
 
-	gtk_init_with_args(&argc,&argv,PACKAGE_NAME,args,PACKAGE_NAME,&err);
+	//gtk_init_with_args(&argc,&argv,PACKAGE_NAME,args,PACKAGE_NAME,&err);
+    gtk_init();
 
 	if(err)
 	{
@@ -90,7 +94,7 @@ int main(int argc, char* argv[])
 
 	bus = ibus_bus_new();
 
-	g_signal_connect (bus, "disconnected", G_CALLBACK (gtk_main_quit), NULL);
+	g_signal_connect (bus, "disconnected", G_CALLBACK (g_application_quit), NULL);
 
 	factory = ibus_factory_new(ibus_bus_get_connection(bus));
 
@@ -139,11 +143,13 @@ int main(int argc, char* argv[])
 
 	g_object_unref(component);
 
-	GdkScreen * screen = gdk_screen_get_default();
-	GdkVisual * visual = gdk_screen_get_rgba_visual(screen);
+	GdkDisplay * Display = gdk_display_get_default();
 
 	printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
+    
+    while(running){
+	g_main_context_iteration(NULL, TRUE);
+    }
 
-	gtk_main();
 	return 0;
 }

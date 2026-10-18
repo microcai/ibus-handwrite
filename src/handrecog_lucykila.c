@@ -17,6 +17,7 @@
 #include <string.h>
 #include <glib.h>
 #include <cairo.h>
+#include <graphene.h>
 
 #include "engine.h"
 #include "handrecog.h"
@@ -120,8 +121,8 @@ static int lucykila_open_table(IbusHandwriteRecogLucyKila*obj)
 
 void ibus_handwrite_recog_change_stroke(IbusHandwriteRecog* obj)
 {
-	GdkPoint startpoint;
-	GdkPoint endpoint;
+	graphene_point_t startpoint;
+	graphene_point_t endpoint;
 
 	IbusHandwriteRecogLucyKila * me;
 	int i;

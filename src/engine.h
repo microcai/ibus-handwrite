@@ -4,6 +4,7 @@
 
 #include <ibus.h>
 #include <gtk/gtk.h>
+#include <graphene.h>
 #include "handrecog.h"
 
 #define IBUS_TYPE_HANDWRITE_ENGINE	\
@@ -24,7 +25,7 @@ struct _IBusHandwriteEngine
 	GType		engine_type;
 	GtkWidget * drawpanel;
 	GtkWidget * lookuppanel;
-	GdkPoint lastpoint;
+    graphene_point_t lastpoint;
 	GdkRGBA color[1]; // color used by pen
 	guint mouse_state;
 	IbusHandwriteRecog * engine;

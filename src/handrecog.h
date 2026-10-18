@@ -9,6 +9,7 @@
 #define HANDRECOG_C_
 
 #include <glib.h>
+#include <graphene.h>
 
 typedef struct _LineStroke LineStroke;
 typedef struct _MatchedChar MatchedChar;
@@ -18,7 +19,7 @@ typedef struct _IbusHandwriteRecogClass IbusHandwriteRecogClass;
 struct _LineStroke
 {
 	int		segments; //包含有的段数目
-	GdkPoint* points; //包含的用来构成笔画的点
+	graphene_point_t* points; //包含的用来构成笔画的点
 };
 
 struct _MatchedChar{

@@ -80,7 +80,7 @@ static gboolean ibus_handwrite_recog_zinnia_domatch(IbusHandwriteRecog*obj,int w
 
 	recognizer = IBUS_HANDWRITE_RECOG_ZINNIA(obj)->recognizer;
 
-	gtk_window_get_size(GTK_WINDOW(obj->engine->drawpanel),&width,&height);
+	width = gtk_widget_get_width(obj->engine->drawpanel);
 
 	character = zinnia_character_new();
 
