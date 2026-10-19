@@ -138,7 +138,6 @@ static void on_drag(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBus
 	//ct = event->y < (height - PANELHEIGHT) ?  GDK_PENCIL:GDK_CENTER_PTR;
     GdkEventSequence* sequence = gtk_gesture_get_last_updated_sequence(GTK_GESTURE(gesture));
     GdkEvent* event = gtk_gesture_get_last_event(GTK_GESTURE(gesture),sequence);
-
     GdkModifierType mods = gdk_event_get_modifier_state(event);
 
 
@@ -156,7 +155,25 @@ static void on_drag(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBus
     double event_y;
     gdk_event_get_position( event, &event_x,&event_y);
 
-	if (mods == GDK_BUTTON1_MASK) // 鼠标按下状态
+    if((mods == GDK_BUTTON2_MASK)||(mods == GDK_BUTTON3_MASK)){
+        GdkDevice*device = gdk_event_get_device(event);
+        GdkSurface* surface = gtk_native_get_surface(
+                gtk_widget_get_native(GTK_WIDGET(engine->drawpanel)));
+        GdkToplevel* toplevel = GDK_TOPLEVEL(surface);
+        guint32 time = gdk_event_get_time(event);
+
+
+
+        if(mods == GDK_BUTTON2_MASK)
+	    {
+            gdk_toplevel_begin_resize(toplevel,GDK_SURFACE_EDGE_SOUTH_WEST,device,2,event_x,event_y,time);
+
+	    }else if( mods == (GDK_BUTTON3_MASK ))
+	    {
+            gdk_toplevel_begin_move(toplevel, device,3,event_x,event_y,time);
+        }
+
+    }else // 鼠标按下状态
 	{
         
 		engine->currentstroke.points
@@ -170,51 +187,30 @@ static void on_drag(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBus
         
 		engine->currentstroke.segments++;
 		printf("move, x= %lf, Y=%lf, segments = %d \n",event_x,event_y,engine->currentstroke.segments);
+       	gtk_widget_queue_draw(engine->drawarea);
+
 
 	}
-	else{
-        GdkDevice* device = gdk_event_get_device(event);
-        GdkSurface* surface = gtk_native_get_surface(
-                gtk_widget_get_native(GTK_WIDGET(engine->drawpanel)));
-        GdkToplevel* toplevel = GDK_TOPLEVEL(surface);
-        guint32 time = gdk_event_get_time(event);
-
-
-
-        if(mods == GDK_BUTTON2_MASK)
-	    {
-            gdk_toplevel_begin_resize(toplevel,GDK_SURFACE_EDGE_SOUTH_WEST,device,2,event_x,event_y,time);
-
-	    }
-	    else if( mods == (GDK_BUTTON3_MASK ))
-	    {
-            gdk_toplevel_begin_move(toplevel, device,3,event_x,event_y,time);
-        }
-    }
     
-		gtk_widget_queue_draw(engine->drawarea);
-
+	
 }
-/**
-static gboolean on_button(GtkWidget* widget, GdkButtonEvent *event, gpointer user_data)
+static void on_drag_begin(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBusHandwriteEngine* engine)
 {
-	IBusHandwriteEngine * engine;
 
-	engine = (IBusHandwriteEngine *) (user_data);
+    GdkEventSequence* sequence = gtk_gesture_get_last_updated_sequence(GTK_GESTURE(gesture));
+    GdkEvent* event = gtk_gesture_get_last_event(GTK_GESTURE(gesture),sequence);
+    GdkModifierType mods = gdk_event_get_modifier_state(event);
 
-	switch (event->type)
-	{
+    double event_x, event_y;
+    gdk_event_get_position(event,&event_x,&event_y);
 
-	case GDK_BUTTON_PRESS:
-		if(event->button != 1)
+		if(!(mods == GDK_BUTTON1_MASK||gdk_event_get_event_type(event)!=GDK_TOUCH_BEGIN))
 		{
-			engine->mouse_state = 0;
-			engine->lastpoint.x = event->x;
-			engine->lastpoint.y = event->y;
-			return TRUE;
+			engine->lastpoint.x = event_x;
+			engine->lastpoint.y = event_y;
+			return ;
 		}
 
-		engine->mouse_state = GDK_BUTTON_PRESS;
 
 		g_print("mouse clicked\n");
 
@@ -222,12 +218,11 @@ static gboolean on_button(GtkWidget* widget, GdkButtonEvent *event, gpointer use
 
 		engine->currentstroke.points = g_new(graphene_point_t,1);
 
-		engine->currentstroke.points[0].x = event->x;
-		engine->currentstroke.points[0].y = event->y;
+		engine->currentstroke.points[0].x = event_x;
+		engine->currentstroke.points[0].y = event_y;
 
-		break;
-	case GDK_BUTTON_RELEASE:
-		engine->mouse_state = GDK_BUTTON_RELEASE;
+    }
+static void on_drag_end(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBusHandwriteEngine* engine){
 
 		ibus_handwrite_recog_append_stroke(engine->engine,engine->currentstroke);
 
@@ -240,16 +235,11 @@ static gboolean on_button(GtkWidget* widget, GdkButtonEvent *event, gpointer use
 
 		g_print("mouse released\n");
 
-		gtk_widget_queue_draw(widget);
+		gtk_widget_queue_draw(engine->drawarea);
 		regen_lookuptable(GTK_GRID(engine->lookuppanel),engine);
 
-		break;
-	default:
-		return FALSE;
-	}
-	return TRUE;
 }
-*/
+
 
 void UI_buildui(IBusHandwriteEngine * engine)
 {
@@ -291,7 +281,7 @@ void UI_buildui(IBusHandwriteEngine * engine)
         gesture = gtk_gesture_drag_new();
         g_signal_connect(gesture,"drag-begin",G_CALLBACK(on_drag),engine);
 		g_signal_connect(gesture,"drag-update",G_CALLBACK(on_drag),engine);
-        g_signal_connect(gesture,"drag-end", G_CALLBACK(on_drag),engine);
+        g_signal_connect(gesture,"drag-end", G_CALLBACK(on_drag_end),engine);
         gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture),GTK_PHASE_BUBBLE);
         gtk_widget_add_controller(engine->drawarea, GTK_EVENT_CONTROLLER(gesture));
 
