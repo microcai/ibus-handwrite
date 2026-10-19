@@ -24,6 +24,7 @@ struct _IBusHandwriteEngine
 	/* members */
 	GType		engine_type;
 	GtkWidget * drawpanel;
+    GtkWidget * drawarea;
 	GtkWidget * lookuppanel;
     graphene_point_t lastpoint;
 	GdkRGBA color[1]; // color used by pen

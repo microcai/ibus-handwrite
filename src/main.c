@@ -31,6 +31,8 @@ int main(int argc, char* argv[])
 {
 	IBusComponent *component;
 	IBusEngineDesc * desc;
+    GMainLoop* loop = g_main_loop_new(NULL,FALSE);
+    GOptionContext* context = g_option_context_new("context text");
 
 	GError * err = NULL;
 
@@ -56,8 +58,12 @@ int main(int argc, char* argv[])
 			{0}
 	};
 
+
 	//gtk_init_with_args(&argc,&argv,PACKAGE_NAME,args,PACKAGE_NAME,&err);
     gtk_init();
+
+    g_option_context_add_main_entries(context, args,NULL);
+    g_option_context_parse(context, &argc, &argv, &err);
 
 	if(err)
 	{
@@ -147,9 +153,9 @@ int main(int argc, char* argv[])
 
 	printf(_("ibus-handwrite Version %s Start Up\n"), PACKAGE_VERSION);
     
-    while(running){
-	g_main_context_iteration(NULL, TRUE);
-    }
+    
+	g_main_loop_run(loop);
+    
 
 	return 0;
 }
