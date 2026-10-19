@@ -23,7 +23,7 @@
 m4_define([package_name], [ibus-handwrite])
     
 AC_PREREQ([2.72])
-AC_INIT([package_name],[3.0.0],[http://code.google.com/p/ibus/issues/entry],[package_name])
+AC_INIT([package_name],[3.9.9.a],[http://code.google.com/p/ibus/issues/entry],[package_name])
 AM_INIT_AUTOMAKE([-Wall])
 AC_USE_SYSTEM_EXTENSIONS
 
