@@ -12,9 +12,9 @@ Source0:    http://ibus-handwrite.googlecode.com/files/%{name}-%{version}.tar.gz
 Source1:    handwriting-zh_CN.model
 
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  gettext ibus-devel gtk3-devel zinnia-devel @zinnia_tomoe@
+BuildRequires:  gettext ibus-devel gtk4-devel zinnia-devel @zinnia_tomoe@
 
-Requires:   ibus gtk3 @zinnia_tomoe@ @zinnia@
+Requires:   ibus gtk4 @zinnia_tomoe@ @zinnia@
 
 %description
 IBus handwrite project.
