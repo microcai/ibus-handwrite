@@ -40,8 +40,10 @@ static gboolean _draw_lines(cairo_t * cr, LineStroke * cl)
 	return TRUE;
 }
 
-    static void clicked(GtkButton *button, IBusHandwriteEngine *engine)
+    static void clicked(GtkGestureClick* click,gint n_press, gdouble x,gdouble y, IBusHandwriteEngine *engine)
 		{
+            printf("a button was clicked");
+            GtkWidget* button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(click));
 			ibus_handwrite_engine_commit_text(engine,GPOINTER_TO_INT(g_object_get_data(G_OBJECT(button),"order")));
 		}
 
@@ -50,7 +52,6 @@ static void paint_lines(GtkDrawingArea *widget, cairo_t * cr,int width,int heigh
         //IBusHandwriteEngine * engine)
 {
     IBusHandwriteEngine* engine = IBUS_HANDWRITE_ENGINE(user_data); 
-	GtkStyleContext* stylectx;
 
 	LineStroke cl;
 	int i;
@@ -106,8 +107,8 @@ static void regen_lookuptable(GtkGrid * widget, IBusHandwriteEngine * engine)
 		sprintf(drawtext,"%d.%s",i,matched[i].chr);
 
 		bt = gtk_button_new_with_label(drawtext);
-
-		g_object_set(G_OBJECT(bt), "expand", TRUE, NULL);
+        gtk_widget_set_hexpand(bt,TRUE);
+        gtk_widget_set_valign(bt,GTK_ALIGN_END);
 
 		gtk_grid_attach(GTK_GRID(widget), bt, i%5, i/5, 1, 1);
 
@@ -115,7 +116,9 @@ static void regen_lookuptable(GtkGrid * widget, IBusHandwriteEngine * engine)
 
 
 		g_object_set_data(G_OBJECT(bt),"order",GINT_TO_POINTER(i));
-		//g_signal_connect(bt,"clicked",G_CALLBACK(clicked),engine);
+        GtkGesture* gesture = gtk_gesture_click_new();
+        g_signal_connect(gesture, "pressed", G_CALLBACK(clicked),engine);
+        gtk_widget_add_controller(bt,GTK_EVENT_CONTROLLER(gesture));
 
 		gtk_widget_set_visible(bt,TRUE);
 	}
@@ -126,8 +129,6 @@ static void on_drag(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBus
 {
     printf("drag\n");
 
-	//GdkCursorType ct ;
-
 	gint width,height;
 
 	GtkWindow * window;
@@ -135,14 +136,21 @@ static void on_drag(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBus
 	width=gtk_widget_get_width(engine->drawpanel);
     height=gtk_widget_get_height(engine->drawpanel);
 
-	//ct = event->y < (height - PANELHEIGHT) ?  GDK_PENCIL:GDK_CENTER_PTR;
     GdkEventSequence* sequence = gtk_gesture_get_last_updated_sequence(GTK_GESTURE(gesture));
     GdkEvent* event = gtk_gesture_get_last_event(GTK_GESTURE(gesture),sequence);
     GdkModifierType mods = gdk_event_get_modifier_state(event);
 
 
+    double event_x;
+    double event_y;
+    gdk_event_get_position( event, &event_x,&event_y);
+	if(event_y < (height - PANELHEIGHT)){gtk_widget_set_cursor_from_name(engine->drawpanel,"pencil");
+    }else{
+        gtk_widget_set_cursor_from_name(engine->drawpanel,"center_ptr");
+    }
+
 	if(mods & GDK_BUTTON2_MASK )
-		gtk_widget_set_cursor_from_name(engine->drawpanel,"se-resize");
+		gtk_widget_set_cursor_from_name(engine->drawpanel,"sw-resize");
 
     
 	if( mods & GDK_BUTTON2_MASK | GDK_BUTTON3_MASK )
@@ -151,22 +159,21 @@ static void on_drag(GtkGestureDrag* gesture,gdouble start_x,gdouble start_y,IBus
     GtkRoot *root = gtk_widget_get_root(engine->drawpanel);
 	window = GTK_WINDOW(root);
 
-    double event_x;
-    double event_y;
-    gdk_event_get_position( event, &event_x,&event_y);
 
-    if((mods == GDK_BUTTON2_MASK)||(mods == GDK_BUTTON3_MASK)){
+    printf("mods %x", mods);
+
+    if((mods & (GDK_BUTTON2_MASK | GDK_BUTTON3_MASK))){
         GdkDevice*device = gdk_event_get_device(event);
         GdkSurface* surface = gtk_native_get_surface(
                 gtk_widget_get_native(GTK_WIDGET(engine->drawpanel)));
         GdkToplevel* toplevel = GDK_TOPLEVEL(surface);
         guint32 time = gdk_event_get_time(event);
 
-
-
+        printf("toplevel %lx, device %lx,event_x %f, event_y %f, time %i \n",
+                (long)toplevel,(long)device,event_x,event_y,time);
         if(mods == GDK_BUTTON2_MASK)
 	    {
-            gdk_toplevel_begin_resize(toplevel,GDK_SURFACE_EDGE_SOUTH_WEST,device,2,event_x,event_y,time);
+            gdk_toplevel_begin_resize(toplevel,GDK_SURFACE_EDGE_SOUTH_EAST,device,2,event_x,event_y,time);
 
 	    }else if( mods == (GDK_BUTTON3_MASK ))
 	    {
@@ -203,14 +210,6 @@ static void on_drag_begin(GtkGestureDrag* gesture,gdouble start_x,gdouble start_
 
     double event_x, event_y;
     gdk_event_get_position(event,&event_x,&event_y);
-
-		if(!(mods == GDK_BUTTON1_MASK||gdk_event_get_event_type(event)!=GDK_TOUCH_BEGIN))
-		{
-			engine->lastpoint.x = event_x;
-			engine->lastpoint.y = event_y;
-			return ;
-		}
-
 
 		g_print("mouse clicked\n");
 
@@ -265,6 +264,7 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		engine->drawarea = gtk_drawing_area_new();
         gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(engine->drawarea),paint_lines,engine,NULL);
+        gtk_widget_set_vexpand(engine->drawarea,TRUE);
 
 
 		gtk_box_prepend(GTK_BOX(vbox),engine->drawarea);
@@ -275,10 +275,13 @@ void UI_buildui(IBusHandwriteEngine * engine)
 
 		gtk_box_append(GTK_BOX(vbox),engine->lookuppanel);
 		gtk_widget_set_size_request(engine->lookuppanel, WIDTH, PANELHEIGHT);
+        gtk_widget_set_vexpand(engine->lookuppanel,FALSE);
+        gtk_widget_set_valign(engine->lookuppanel,GTK_ALIGN_END);
 
-		//gtk_widget_add_events(GTK_WIDGET(drawing_area),GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK| GDK_BUTTON_PRESS_MASK);
 
+        //drag for drawarea
         gesture = gtk_gesture_drag_new();
+        gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture),0);
         g_signal_connect(gesture,"drag-begin",G_CALLBACK(on_drag),engine);
 		g_signal_connect(gesture,"drag-update",G_CALLBACK(on_drag),engine);
         g_signal_connect(gesture,"drag-end", G_CALLBACK(on_drag_end),engine);

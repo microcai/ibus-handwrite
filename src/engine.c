@@ -167,8 +167,10 @@ static void ibus_handwrite_engine_reset(IBusHandwriteEngine *engine)
 //	ibus_handwrite_engine_disable(engine);
 }
 
-static void on_color_chosen(GObject* source_object, GAsyncResult* res, gpointer data){
+static void on_color_chosen(GObject* source_object, GAsyncResult* res, gpointer userdata){
     GtkColorDialog *dialog = GTK_COLOR_DIALOG(source_object);
+    IBusHandwriteEngine* handwrite = IBUS_HANDWRITE_ENGINE(userdata);
+
 
     GError *error = NULL;
 
@@ -181,7 +183,9 @@ static void on_color_chosen(GObject* source_object, GAsyncResult* res, gpointer 
     }
 
     if (color != NULL) {
-        
+
+       handwrite->color[0]=*color;
+       gtk_widget_queue_draw(handwrite->drawarea);
 
     }
 }
@@ -212,7 +216,7 @@ void ibus_handwrite_property_activate(IBusEngine *engine,const gchar *prop_name,
 
 		gtk_color_dialog_choose_rgba(GTK_COLOR_DIALOG(dialog),NULL, //window
                 handwrite->color,
-                NULL,on_color_chosen,NULL //GCancellable, GAsyncREadyCallback, gpointer
+                NULL,on_color_chosen,handwrite //GCancellable, GAsyncREadyCallback, gpointer
                 );
     
         gtk_widget_set_visible(GTK_WIDGET(dialog),TRUE);
